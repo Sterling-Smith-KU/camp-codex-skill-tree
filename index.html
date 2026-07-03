@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Camp Codex Builder — Skill Tree</title>
+<style>
+  :root{
+    --bg:#090c0a; --bg-2:#0e1210; --panel:#0c100d;
+    --ink:#eae7dd; --muted:#8b9086; --faint:#5c615a;
+    --line:rgba(255,255,255,.08);
+    --foundation:#EAB308; --harness:#22C55E; --architecture:#EF4444; --craft:#3B82F6;
+    --trunk:#F1E9CF;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 620px at 50% -6%, rgba(34,197,94,.06), transparent 60%),
+      radial-gradient(900px 900px at 50% 118%, rgba(59,130,246,.05), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+  }
+
+  /* ---------- Header ---------- */
+  header.tree-header{max-width:1000px;margin:0 auto;padding:52px 24px 8px;text-align:center}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.42em;color:var(--faint);text-transform:uppercase;margin:0 0 14px}
+  h1{
+    margin:0;font-size:clamp(30px,6vw,58px);line-height:.98;font-weight:800;
+    letter-spacing:.02em;text-transform:uppercase;
+  }
+  h1 .thin{display:block;font-weight:300;font-size:.42em;letter-spacing:.34em;color:var(--muted);margin-top:14px}
+  .subtitle{margin:16px auto 0;max-width:560px;color:var(--muted);font-size:14.5px;line-height:1.5}
+  .subtitle b{color:var(--ink);font-weight:600}
+
+  #sp-counter{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .total-pill{
+    font-family:var(--font-mono);font-size:13px;letter-spacing:.14em;color:var(--ink);
+    border:1px solid var(--line);border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.02);
+  }
+  .total-pill b{color:#fff}
+  .branch-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.04em;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.015)}
+  .chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 9px var(--c)}
+  .chip .num{font-family:var(--font-mono);color:var(--ink);font-weight:600}
+
+  #legend{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin:22px auto 0;
+    font-size:11.5px;color:var(--faint);letter-spacing:.05em}
+  #legend span{display:inline-flex;align-items:center;gap:7px}
+  .key-orb{width:13px;height:13px;border-radius:50%;border:1.6px solid var(--muted)}
+  .key-orb.cap{border-color:var(--ink);transform:rotate(45deg);border-radius:3px}
+  .key-orb.lock{border-style:dashed;border-color:var(--faint)}
+
+  /* ---------- Tree ---------- */
+  .tree-scroll{overflow-x:auto;overflow-y:hidden;padding:8px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+  .tree-scroll::-webkit-scrollbar{height:8px}
+  .tree-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
+  #tree{position:relative;margin:0 auto}
+  #connectors{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+  #nodes{position:absolute;inset:0;z-index:2}
+
+  .edge{fill:none;stroke:var(--c);stroke-width:2.3;opacity:.42;stroke-linecap:round;transition:opacity .18s,stroke-width .18s}
+  .edge.ph{opacity:.14;stroke-width:1.6;stroke-dasharray:2 6}
+  .edge.hot{opacity:.92;stroke-width:3}
+
+  .orb{
+    position:absolute;border-radius:50%;padding:0;margin:0;cursor:pointer;z-index:3;
+    display:grid;place-items:center;color:inherit;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle at 50% 34%, color-mix(in srgb,var(--c) 26%,#0d110d), #090c09 74%);
+    border:2px solid var(--c);
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 10%,transparent),
+               0 0 16px color-mix(in srgb,var(--c) 40%,transparent),
+               inset 0 0 12px color-mix(in srgb,var(--c) 16%,transparent);
+    transition:transform .16s ease, box-shadow .16s ease;
+  }
+  .orb .sp{font-family:var(--font-mono);font-weight:600;font-size:12px;color:color-mix(in srgb,var(--c) 55%,#fff)}
+  .orb.arm{width:52px;height:52px}
+  .orb.root{width:66px;height:66px;border-width:2.5px}
+  .orb.root .sp{font-size:14px}
+  .orb.capstone{width:70px;height:70px;border-width:2.5px;
+    box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 12%,transparent),
+               0 0 26px color-mix(in srgb,var(--c) 55%,transparent),
+               inset 0 0 16px color-mix(in srgb,var(--c) 22%,transparent)}
+  .orb.capstone .sp{font-size:15px}
+  .orb.capstone::before{content:"◆";position:absolute;top:-19px;font-size:12px;color:var(--c);
+    text-shadow:0 0 10px var(--c)}
+  .orb.trunk{width:104px;height:104px;--c:var(--trunk);border-width:2.5px;cursor:default;
+    box-shadow:0 0 0 6px rgba(241,233,207,.06),0 0 40px rgba(241,233,207,.28),
+               inset 0 0 22px rgba(241,233,207,.14)}
+  .orb.trunk .mark{font-family:var(--font-mono);font-weight:700;font-size:19px;letter-spacing:.06em;color:#fff}
+  .orb.placeholder{width:44px;height:44px;border:1.6px dashed color-mix(in srgb,var(--c) 42%,#4a4f47);
+    background:rgba(255,255,255,.012);box-shadow:none;opacity:.55;cursor:default}
+
+  .orb:hover:not(.trunk):not(.placeholder),
+  .orb:focus-visible{transform:translate(-50%,-50%) scale(1.14);outline:none;
+    box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 16%,transparent),
+               0 0 30px color-mix(in srgb,var(--c) 75%,transparent),
+               inset 0 0 16px color-mix(in srgb,var(--c) 28%,transparent);z-index:6}
+
+  .name{position:absolute;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:2;
+    width:126px;font-size:9.5px;line-height:1.2;letter-spacing:.075em;text-transform:uppercase;
+    color:color-mix(in srgb,var(--c) 26%,var(--muted))}
+  .name.root,.name.capstone{font-size:10.5px;font-weight:600;width:140px;color:color-mix(in srgb,var(--c) 52%,var(--ink))}
+  .name.trunk{font-size:12.5px;font-weight:700;letter-spacing:.16em;width:200px;color:var(--ink)}
+  .name.session{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint);
+    text-transform:none;margin-top:2px;font-weight:400}
+
+  .scroll-hint{display:none;text-align:center;font-family:var(--font-mono);font-size:10.5px;
+    letter-spacing:.18em;color:var(--faint);text-transform:uppercase;padding:2px 0 10px}
+
+  /* ---------- Tooltip ---------- */
+  #tooltip{position:fixed;z-index:50;max-width:290px;pointer-events:none;
+    background:rgba(12,16,13,.97);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px 15px;box-shadow:0 18px 44px rgba(0,0,0,.6);
+    backdrop-filter:blur(6px);opacity:0;transform:translateY(4px);transition:opacity .13s,transform .13s}
+  #tooltip.show{opacity:1;transform:translateY(0)}
+  #tooltip .tt-accent{height:3px;width:34px;border-radius:2px;background:var(--c);box-shadow:0 0 12px var(--c);margin-bottom:11px}
+  #tooltip .tt-name{font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);line-height:1.15}
+  #tooltip .tt-meta{display:flex;gap:10px;align-items:center;margin:8px 0 10px;
+    font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+  #tooltip .tt-tier{color:color-mix(in srgb,var(--c) 70%,#fff)}
+  #tooltip .tt-sp{color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+  #tooltip .tt-desc{font-size:12.5px;line-height:1.55;color:var(--muted)}
+
+  /* ---------- Carousel ---------- */
+  #carousel{margin-top:36px;border-top:1px solid var(--line);
+    background:linear-gradient(180deg,transparent,rgba(255,255,255,.012));padding:30px 0 42px;position:relative;overflow:hidden}
+  #carousel .built-label{text-align:center;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.4em;
+    color:var(--faint);text-transform:uppercase;margin-bottom:22px}
+  .marquee{position:relative;overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+  .marquee-track{display:flex;width:max-content;gap:14px;animation:scroll 46s linear infinite}
+  .marquee:hover .marquee-track{animation-play-state:paused}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+  .brand{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;flex:0 0 auto;
+    border:1px solid var(--line);border-radius:999px;padding:10px 17px;background:rgba(255,255,255,.02);
+    font-size:13px;letter-spacing:.02em;color:var(--muted);transition:color .2s,border-color .2s,background .2s}
+  .brand:hover{color:var(--ink);border-color:color-mix(in srgb,var(--bd) 55%,var(--line));background:rgba(255,255,255,.045)}
+  .brand .bdot{width:9px;height:9px;border-radius:50%;background:var(--bd);box-shadow:0 0 9px var(--bd)}
+
+  footer{text-align:center;padding:26px 20px 44px;color:var(--faint);
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.08em}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+
+  @media (max-width:900px){ .scroll-hint{display:block} }
+  @media (prefers-reduced-motion:reduce){
+    .orb,.edge,#tooltip{transition:none}
+    .marquee-track{animation:none;flex-wrap:wrap;justify-content:center;width:auto;
+      -webkit-mask-image:none;mask-image:none;padding:0 16px}
+    .marquee{-webkit-mask-image:none;mask-image:none}
+  }
+</style>
+</head>
+<body>
+  <header class="tree-header">
+    <p class="eyebrow">Camp Codex · Builder Track</p>
+    <h1>Camp Codex Builder<span class="thin">Skill Tree</span></h1>
+    <p class="subtitle">Four sessions with <b>Josh Wexler</b>, translated into a skill tree. Every node is an ability you earned — hover any orb to read what it lets you do.</p>
+
+    <div id="sp-counter">
+      <span class="total-pill"><b>57 SP</b> · 49 NODES</span>
+      <div class="branch-chips">
+        <span class="chip" style="--c:var(--foundation)"><span class="dot"></span>Foundation <span class="num">13</span></span>
+        <span class="chip" style="--c:var(--harness)"><span class="dot"></span>The Harness <span class="num">15</span></span>
+        <span class="chip" style="--c:var(--architecture)"><span class="dot"></span>Architecture <span class="num">14</span></span>
+        <span class="chip" style="--c:var(--craft)"><span class="dot"></span>The Craft <span class="num">15</span></span>
+      </div>
+    </div>
+
+    <div id="legend">
+      <span><span class="key-orb"></span>Root / ability</span>
+      <span><span class="key-orb cap"></span>Capstone (2 SP)</span>
+      <span><span class="key-orb lock"></span>Locked · coming soon</span>
+    </div>
+  </header>
+
+  <div class="tree-scroll">
+    <main id="tree" aria-label="Camp Codex builder skill tree">
+      <svg id="connectors" aria-hidden="true"></svg>
+      <div id="nodes"></div>
+    </main>
+  </div>
+  <p class="scroll-hint">‹ scroll to explore ›</p>
+
+  <div id="tooltip" role="tooltip" hidden>
+    <div class="tt-accent"></div>
+    <div class="tt-name"></div>
+    <div class="tt-meta"><span class="tt-tier"></span><span class="tt-sp"></span></div>
+    <div class="tt-desc"></div>
+  </div>
+
+  <section id="carousel" aria-label="Tools and companies used to build">
+    <div class="built-label">Built with</div>
+    <div class="marquee"><div class="marquee-track" id="marquee-track"></div></div>
+  </section>
+
+  <footer>
+    49 nodes · 57 SP · Source: Camp Codex sessions 1–4 (Josh Wexler)
+  </footer>
+
+<script>
+/* ============================================================
+   DATA — verbatim from camp-codex-skill-tree.md (49 nodes, 57 SP)
+   ============================================================ */
+const BRANCHES = {
+  foundation:   { name:'Foundation',   session:'S1 · Mindset & frameworks', color:'var(--foundation)',   spTotal:13, order:0, arms:['doctrine','discipline'] },
+  harness:      { name:'The Harness',  session:'S2 · Agentic harnesses',    color:'var(--harness)',      spTotal:15, order:1, arms:['anatomy','control'] },
+  architecture: { name:'Architecture', session:'S3 · How apps work',        color:'var(--architecture)', spTotal:14, order:2, arms:['stack','method'] },
+  craft:        { name:'The Craft',    session:'S4 · Design & optimization',color:'var(--craft)',        spTotal:15, order:3, arms:['design','optimization'] },
+};
+const ARM_LABELS = {doctrine:'Doctrine',discipline:'Discipline',anatomy:'Anatomy',control:'Control',
+  stack:'The Stack',method:'The Method',design:'Design',optimization:'Optimization'};
+const TRUNK = { id:'trunk', label:'CAMP CODEX BUILDER' };
+
+const TREE_DATA = [
+  // ---------- FOUNDATION ----------
+  {id:'fo-root',branch:'foundation',tier:'root',arm:null,label:"BUILD, DON'T CHAT",sp:1,tooltip:"Lets you create apps, automations, agents, and workflows instead of just prompting a chatbot."},
+  {id:'fo-do1',branch:'foundation',tier:'arm',arm:'doctrine',label:'VOCABULARY FIRST',sp:1,tooltip:"Grants the technical vocabulary you need to navigate a field that moves a mile a minute."},
+  {id:'fo-do2',branch:'foundation',tier:'arm',arm:'doctrine',label:'THE THREE USES',sp:1,tooltip:"Unlocks AI's core modes: automate a task, augment a human, enable a new skill."},
+  {id:'fo-do3',branch:'foundation',tier:'arm',arm:'doctrine',label:'FIVE ROLES',sp:1,tooltip:"Lets you cast AI as assistant, co-creative partner, tutor, coach, or advisor."},
+  {id:'fo-do4',branch:'foundation',tier:'arm',arm:'doctrine',label:'CO-CREATIVE PARTNER',sp:2,tooltip:"Work with the model instead of just handing off; cuts hallucinations and weak output."},
+  {id:'fo-di1',branch:'foundation',tier:'arm',arm:'discipline',label:'RESIST THE HYPE',sp:1,tooltip:"Try a new tool fast, keep what works, and walk past trend-chasing like “caveman mode.”"},
+  {id:'fo-di2',branch:'foundation',tier:'arm',arm:'discipline',label:'TAME THE PEOPLE PLEASER',sp:1,tooltip:"Make the AI confirm its plan before it runs, so it stops over-building and burning your tokens."},
+  {id:'fo-di3',branch:'foundation',tier:'arm',arm:'discipline',label:'AGENT CAUTION',sp:1,tooltip:"Avoid brittle, non-deterministic agent stacks that get expensive and break down over time."},
+  {id:'fo-di4',branch:'foundation',tier:'arm',arm:'discipline',label:'MODEL ROULETTE',sp:1,tooltip:"Swap between Sonnet, Opus, and Haiku to match the model to the task's complexity."},
+  {id:'fo-di5',branch:'foundation',tier:'arm',arm:'discipline',label:'CONFIG HIERARCHY',sp:1,tooltip:"Project instructions take priority; Codex reads project config before your system preferences."},
+  {id:'fo-cap',branch:'foundation',tier:'capstone',arm:null,label:"ITERATE, DON'T ENVISION",sp:2,tooltip:"Ship small, fail, refine; constant iteration beats one grand vision, and credits reset, so take the risk."},
+
+  // ---------- THE HARNESS ----------
+  {id:'ha-root',branch:'harness',tier:'root',arm:null,label:'AGENTIC HARNESS',sp:1,tooltip:"Unlocks coding agents: wrappers around an LLM, aimed at code, with direct access to your files."},
+  {id:'ha-an1',branch:'harness',tier:'arm',arm:'anatomy',label:'STOCHASTIC MACHINE',sp:1,tooltip:"Reveals the truth under the hood; the model predicts the next token, it does not reason."},
+  {id:'ha-an2',branch:'harness',tier:'arm',arm:'anatomy',label:'FILE SYSTEM ACCESS',sp:1,tooltip:"Lets the agent read and write your real project files, which a web chatbot cannot do."},
+  {id:'ha-an3',branch:'harness',tier:'arm',arm:'anatomy',label:'SKILLS AS MARKDOWN',sp:1,tooltip:"Encode a workflow in a markdown file the agent follows; a long-form prompt with extra steps."},
+  {id:'ha-an4',branch:'harness',tier:'arm',arm:'anatomy',label:'TOOL USE',sp:1,tooltip:"Grants the agent hands: Bash commands, file search, and more."},
+  {id:'ha-an5',branch:'harness',tier:'arm',arm:'anatomy',label:'MCP LINK',sp:1,tooltip:"Connects the agent to outside services like Notion, Gmail, and Cloudflare."},
+  {id:'ha-an6',branch:'harness',tier:'arm',arm:'anatomy',label:'SUPERPOWERS',sp:2,tooltip:"Installs a full software-development methodology and composable skills into the agent."},
+  {id:'ha-co1',branch:'harness',tier:'arm',arm:'control',label:'GATHER, ACT, VERIFY',sp:1,tooltip:"Unlocks the core agent loop and the human-in-the-loop checkpoint that keeps it honest."},
+  {id:'ha-co2',branch:'harness',tier:'arm',arm:'control',label:'VERSION CONTROL',sp:1,tooltip:"Track every change in GitHub and roll back when an iteration breaks the build."},
+  {id:'ha-co3',branch:'harness',tier:'arm',arm:'control',label:'CONTEXT ROT',sp:1,tooltip:"Warns you that each message re-sends the past, so the model loses the thread as it fills."},
+  {id:'ha-co4',branch:'harness',tier:'arm',arm:'control',label:'THE 40% RULE',sp:1,tooltip:"Keep the context window under 40 percent for reliability, less noise, and lower cost."},
+  {id:'ha-co5',branch:'harness',tier:'arm',arm:'control',label:'TASK DECOMPOSITION',sp:1,tooltip:"Break work into small planned segments; treat the agent as a sharp employee with no memory."},
+  {id:'ha-cap',branch:'harness',tier:'capstone',arm:null,label:'ONE-SHOT OR ITERATE',sp:2,tooltip:"Choose your build: a single prompt in minutes or hours of guided iteration, and craft a small internal tool when an API fights you."},
+
+  // ---------- ARCHITECTURE ----------
+  {id:'ar-root',branch:'architecture',tier:'root',arm:null,label:'REQUEST AND RESPONSE',sp:1,tooltip:"Reveals the cycle: the browser asks, the server fetches from a database, and HTML, CSS, and JS render the page."},
+  {id:'ar-st1',branch:'architecture',tier:'arm',arm:'stack',label:'CLIENT AND SERVER',sp:1,tooltip:"Unlocks the split between the machine asking and the machine answering."},
+  {id:'ar-st2',branch:'architecture',tier:'arm',arm:'stack',label:'FRONT-END, BACK-END',sp:1,tooltip:"Separates the rendered interface from the logic and data; static sites can skip the database entirely."},
+  {id:'ar-st3',branch:'architecture',tier:'arm',arm:'stack',label:'API ACCESS',sp:1,tooltip:"Lets systems talk and outsource hard jobs like email or auth instead of building them from scratch."},
+  {id:'ar-st4',branch:'architecture',tier:'arm',arm:'stack',label:'MCP STANDARD',sp:1,tooltip:"Anthropic's open protocol for AI interoperability; an API tuned for agents."},
+  {id:'ar-st5',branch:'architecture',tier:'arm',arm:'stack',label:'SUPABASE',sp:2,tooltip:"Grants ready-made database and authentication, so you skip the risk of rolling your own."},
+  {id:'ar-me1',branch:'architecture',tier:'arm',arm:'method',label:'AUTH FLOW',sp:1,tooltip:"Shows how credentials get checked, encrypted, against the database, and why custom auth is dangerous."},
+  {id:'ar-me2',branch:'architecture',tier:'arm',arm:'method',label:'GRANULAR BREAKDOWN',sp:1,tooltip:"Split an idea into front-end and back-end tasks and pick a stack without overkill."},
+  {id:'ar-me3',branch:'architecture',tier:'arm',arm:'method',label:'PRODUCT BRIEFS',sp:1,tooltip:"Use Superpowers to generate briefs, strategies, and phased roadmaps that keep a build clear."},
+  {id:'ar-me4',branch:'architecture',tier:'arm',arm:'method',label:'CLEAN DATA',sp:1,tooltip:"Let AI clean and label your data before you build anything on top of it."},
+  {id:'ar-me5',branch:'architecture',tier:'arm',arm:'method',label:'MERMAID DIAGRAMS',sp:1,tooltip:"Draw architecture as text so the model reads the connections accurately instead of guessing at an image."},
+  {id:'ar-cap',branch:'architecture',tier:'capstone',arm:null,label:'STUCK-LOOP HEURISTIC',sp:2,tooltip:"When the AI loops or stalls, read it as context overload or a wrong path, then simplify or decompose to break free."},
+
+  // ---------- THE CRAFT ----------
+  {id:'cr-root',branch:'craft',tier:'root',arm:null,label:'KILL THE SLOP',sp:1,tooltip:"Unlocks interfaces that do not read as generic AI output, held together by tight scoping."},
+  {id:'cr-de1',branch:'craft',tier:'arm',arm:'design',label:'MERMAID FOR ARCHITECTURE',sp:1,tooltip:"Ask for Mermaid syntax so the AI stops misreading your visual inputs."},
+  {id:'cr-de2',branch:'craft',tier:'arm',arm:'design',label:'AUDIO JOURNALING',sp:1,tooltip:"Talk through the happy path out loud, transcribe it, and feed it to the model as your first requirements."},
+  {id:'cr-de3',branch:'craft',tier:'arm',arm:'design',label:'GOOGLE STITCH',sp:1,tooltip:"Generate design markdown, real color palettes, and interactive components to escape the default look."},
+  {id:'cr-de4',branch:'craft',tier:'arm',arm:'design',label:'DESIGN HANDOFF',sp:1,tooltip:"Zip your design or use MCP so Claude talks straight to your design tools."},
+  {id:'cr-de5',branch:'craft',tier:'arm',arm:'design',label:'CSS GOTCHAS',sp:1,tooltip:"When a style change fails, ask the AI to find the cascade conflict and it usually spots the override."},
+  {id:'cr-de6',branch:'craft',tier:'arm',arm:'design',label:'SHADCN COMPONENTS',sp:2,tooltip:"Drop in an open-source, customizable UI library and save hours on forms and inputs."},
+  {id:'cr-op1',branch:'craft',tier:'arm',arm:'optimization',label:'SKIP TDD EARLY',sp:1,tooltip:"Build working code first; test-driven development burns tokens, so test critical paths and refactors only."},
+  {id:'cr-op2',branch:'craft',tier:'arm',arm:'optimization',label:'CHROME DEVTOOLS MCP',sp:1,tooltip:"Automate QA, debugging, and console inspection in real Chrome instead of the VS Code browser."},
+  {id:'cr-op3',branch:'craft',tier:'arm',arm:'optimization',label:'TERMINAL FOR CLAUDE CODE',sp:1,tooltip:"Run Claude Code from the terminal to dodge path errors, and select elements to point at exact code."},
+  {id:'cr-op4',branch:'craft',tier:'arm',arm:'optimization',label:'SUB-AGENTS',sp:1,tooltip:"Spin up fresh context windows mid-task, even to debate architecture; powerful, but token-hungry."},
+  {id:'cr-op5',branch:'craft',tier:'arm',arm:'optimization',label:'MEMORY TOOLS',sp:1,tooltip:"Go past markdown memory with database options like Memarch, Mem0, and Claude-Mem."},
+  {id:'cr-cap',branch:'craft',tier:'capstone',arm:null,label:'PROTOCOLS AND FOCUS FILES',sp:2,tooltip:"Turn repetitive work into reusable skills and pin your goals in a focus file so the AI stays on target."},
+];
+// Blank top-tier placeholders (content coming later) — 2 per branch
+for (const b of Object.keys(BRANCHES)){
+  TREE_DATA.push({id:b+'-ph1',branch:b,tier:'placeholder',arm:null});
+  TREE_DATA.push({id:b+'-ph2',branch:b,tier:'placeholder',arm:null});
+}
+
+const CAROUSEL_BRANDS = [
+  {name:'OpenAI',dot:'#10A37F'},{name:'Claude',dot:'#D97757'},{name:'Anthropic',dot:'#D97757'},
+  {name:'GitHub',dot:'#e8e7e3'},{name:'VS Code',dot:'#3B82F6'},{name:'Supabase',dot:'#3ECF8E'},
+  {name:'Mermaid',dot:'#FF3670'},{name:'Google Stitch',dot:'#4285F4'},{name:'Notion',dot:'#e8e7e3'},
+  {name:'Gmail',dot:'#EA4335'},{name:'Cloudflare',dot:'#F38020'},{name:'shadcn/ui',dot:'#e8e7e3'},
+  {name:'Chrome DevTools',dot:'#F6C915'},{name:'Mem0',dot:'#9A6BFF'},{name:'Claude-Mem',dot:'#D97757'},
+];
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+const PAD_X=48, COL_W=320, ARM_DX=76;
+const Y_PH=78, Y_CAP=182, Y_ROOT=884, Y_TRUNK=1012;
+const WIDTH = PAD_X*2 + COL_W*Object.keys(BRANCHES).length;   // 48*2 + 320*4 = 1376
+const HEIGHT = 1132;
+const branchCx = order => PAD_X + COL_W/2 + order*COL_W;
+
+function computeLayout(){
+  const positions={}, edges=[];
+  positions['trunk']={x:WIDTH/2, y:Y_TRUNK};
+  for (const b of Object.keys(BRANCHES)){
+    const meta=BRANCHES[b], cx=branchCx(meta.order);
+    const root=TREE_DATA.find(n=>n.branch===b && n.tier==='root');
+    const cap =TREE_DATA.find(n=>n.branch===b && n.tier==='capstone');
+    positions[root.id]={x:cx,y:Y_ROOT};
+    positions[cap.id] ={x:cx,y:Y_CAP};
+    edges.push({from:'trunk',to:root.id,branch:b});
+
+    meta.arms.forEach((armKey,ai)=>{
+      const armX = cx + (ai===0 ? -ARM_DX : ARM_DX);
+      const nodes = TREE_DATA.filter(n=>n.branch===b && n.arm===armKey);
+      const L=nodes.length;
+      nodes.forEach((n,i)=>{
+        const t=(i+1)/(L+1);                          // i=0 sits nearest the root
+        positions[n.id]={x:armX, y:Y_ROOT - t*(Y_ROOT-Y_CAP)};
+      });
+      edges.push({from:root.id,to:nodes[0].id,branch:b});
+      for(let i=0;i<L-1;i++) edges.push({from:nodes[i].id,to:nodes[i+1].id,branch:b});
+      edges.push({from:nodes[L-1].id,to:cap.id,branch:b});
+    });
+
+    const phs=TREE_DATA.filter(n=>n.branch===b && n.tier==='placeholder');
+    phs.forEach((n,i)=>{
+      positions[n.id]={x:cx + (i===0?-ARM_DX:ARM_DX), y:Y_PH};
+      edges.push({from:cap.id,to:n.id,branch:b,ph:true});
+    });
+  }
+  return {positions,edges};
+}
+
+function curve(a,b){ const my=(a.y+b.y)/2; return `M${a.x},${a.y} C${a.x},${my} ${b.x},${my} ${b.x},${b.y}`; }
+const cvar = b => BRANCHES[b] ? BRANCHES[b].color : 'var(--trunk)';
+const R = {arm:26, root:33, capstone:35, placeholder:22, trunk:52};
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderTree(){
+  const {positions,edges}=computeLayout();
+  const svg=document.getElementById('connectors');
+  const nodes=document.getElementById('nodes');
+  const tree=document.getElementById('tree');
+  tree.style.width=WIDTH+'px'; tree.style.height=HEIGHT+'px';
+  svg.setAttribute('viewBox',`0 0 ${WIDTH} ${HEIGHT}`);
+
+  // connectors
+  edges.forEach(e=>{
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',curve(positions[e.from],positions[e.to]));
+    p.setAttribute('class','edge'+(e.ph?' ph':''));
+    p.setAttribute('data-branch',e.branch);
+    p.style.setProperty('--c',cvar(e.branch));
+    svg.appendChild(p);
+  });
+
+  // trunk
+  addOrb({id:'trunk',tier:'trunk',branch:null,label:TRUNK.label}, positions['trunk'], nodes);
+  addName(TRUNK.label,'trunk',positions['trunk'],R.trunk,nodes,'var(--trunk)','Josh Wexler · Camp Codex');
+
+  // data nodes
+  TREE_DATA.forEach(n=>{
+    const pos=positions[n.id]; if(!pos) return;
+    addOrb(n,pos,nodes);
+    if(n.tier!=='placeholder') addName(n.label,n.tier,pos,R[n.tier],nodes,cvar(n.branch));
+  });
+}
+
+function addOrb(n,pos,parent){
+  const el=document.createElement('button');
+  el.className='orb '+n.tier + (n.branch?(' branch-'+n.branch):'');
+  el.style.left=pos.x+'px'; el.style.top=pos.y+'px';
+  el.style.setProperty('--c', n.tier==='trunk' ? 'var(--trunk)' : cvar(n.branch));
+  el.dataset.id=n.id;
+  if(n.tier==='trunk'){ el.innerHTML='<span class="mark">CC</span>'; el.setAttribute('aria-label','Camp Codex Builder — root'); el.tabIndex=-1; }
+  else if(n.tier==='placeholder'){ el.setAttribute('aria-label','Locked node — coming soon'); el.tabIndex=-1; }
+  else { el.innerHTML='<span class="sp">'+n.sp+'</span>'; el.setAttribute('aria-label',`${n.label}. ${n.sp} skill point${n.sp>1?'s':''}. ${n.tooltip}`); }
+  parent.appendChild(el);
+}
+function addName(label,tier,pos,r,parent,c,session){
+  const d=document.createElement('div');
+  d.className='name '+tier;
+  d.style.left=pos.x+'px'; d.style.top=(pos.y+r+7)+'px';
+  d.style.setProperty('--c',c);
+  d.innerHTML = session ? label+'<span class="name session">'+session+'</span>' : label;
+  parent.appendChild(d);
+}
+
+/* ============================================================
+   INTERACTION — tooltip + branch highlight
+   ============================================================ */
+const tip=document.getElementById('tooltip');
+const tierText = n => n.tier==='root'?'Root':n.tier==='capstone'?'Capstone':ARM_LABELS[n.arm]||'';
+let activeBranch=null;
+
+function highlight(branch,on){
+  document.querySelectorAll(`.edge[data-branch="${branch}"]:not(.ph)`).forEach(p=>p.classList.toggle('hot',on));
+}
+function showTip(node, orb){
+  tip.style.setProperty('--c',cvar(node.branch));
+  tip.querySelector('.tt-name').textContent=node.label;
+  tip.querySelector('.tt-tier').textContent=tierText(node);
+  tip.querySelector('.tt-sp').textContent=node.sp+' SP';
+  tip.querySelector('.tt-desc').textContent=node.tooltip;
+  tip.hidden=false; tip.classList.add('show');
+  const r=orb.getBoundingClientRect();
+  const tw=tip.offsetWidth, th=tip.offsetHeight, gap=14;
+  let left=r.left+r.width/2-tw/2;
+  left=Math.max(12,Math.min(left,window.innerWidth-tw-12));
+  let top=r.top-th-gap;
+  if(top<12) top=r.bottom+gap;            // flip below if no room above
+  tip.style.left=left+'px'; tip.style.top=top+'px';
+  if(node.branch!==activeBranch){ if(activeBranch) highlight(activeBranch,false); highlight(node.branch,true); activeBranch=node.branch; }
+}
+function hideTip(){ tip.classList.remove('show'); tip.hidden=true; if(activeBranch){highlight(activeBranch,false);activeBranch=null;} }
+
+function wireInteraction(){
+  const byId=Object.fromEntries(TREE_DATA.map(n=>[n.id,n]));
+  document.querySelectorAll('.orb').forEach(orb=>{
+    const node=byId[orb.dataset.id];
+    if(!node || node.tier==='placeholder') return;
+    orb.addEventListener('mouseenter',()=>showTip(node,orb));
+    orb.addEventListener('mouseleave',hideTip);
+    orb.addEventListener('focus',()=>showTip(node,orb));
+    orb.addEventListener('blur',hideTip);
+    orb.addEventListener('click',e=>{ e.stopPropagation(); showTip(node,orb); }); // touch
+  });
+  document.addEventListener('click',hideTip);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') hideTip(); });
+  window.addEventListener('scroll',hideTip,{passive:true});
+}
+
+/* ============================================================
+   CAROUSEL
+   ============================================================ */
+function initCarousel(){
+  const track=document.getElementById('marquee-track');
+  const make=b=>`<span class="brand" style="--bd:${b.dot}"><span class="bdot"></span>${b.name}</span>`;
+  const set=CAROUSEL_BRANDS.map(make).join('');
+  track.innerHTML=set+set;   // duplicate for a seamless -50% loop
+}
+
+/* boot */
+renderTree();
+wireInteraction();
+initCarousel();
+</script>
+</body>
+</html>
