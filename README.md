@@ -4,7 +4,7 @@ An interactive, self-contained web page that renders the **Camp Codex builder sk
 (four sessions with Josh Wexler) as a video-game-style perk tree. Read-only showcase — hover
 any orb to read what that ability "lets you do."
 
-**Live site:** _(added after first deploy)_
+**Live site:** https://sterling-smith-ku.github.io/camp-codex-skill-tree/
 
 ## What's here
 
