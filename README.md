@@ -37,3 +37,16 @@ All content lives in the `TREE_DATA` array (and `BRANCHES` metadata) inside `ind
 To fill a blank top bubble, replace a `placeholder` entry with a real node object
 (`{ id, branch, tier:'arm', arm, label, sp, tooltip }`); the layout and connectors update
 automatically. Keep the running totals (currently 49 nodes / 57 SP) in sync with the header.
+
+Starting a new build session? Read
+[`docs/superpowers/handoff/2026-07-10-next-session.md`](docs/superpowers/handoff/2026-07-10-next-session.md) first.
+
+## Verifying changes
+
+```bash
+npm install   # first time only — installs Playwright as a devDependency
+npm run verify
+```
+
+Checks node/placeholder/SP counts, tooltip content, console errors, and mobile scroll
+behavior; writes screenshots to `verify-out/` (git-ignored).
