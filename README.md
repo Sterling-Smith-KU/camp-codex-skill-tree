@@ -1,52 +1,55 @@
-# Camp Codex Builder — Skill Tree
+# Camp Codex — Skill Tree
 
-An interactive, self-contained web page that renders the **Camp Codex builder skill tree**
-(four sessions with Josh Wexler) as a video-game-style perk tree. Read-only showcase — hover
-any orb to read what that ability "lets you do."
+An interactive, self-contained web page that renders the **Camp Codex curriculum** as a
+game-style skill tree: three color-coded branches growing from a shared root, 21 modules,
+click-to-unlock progression that persists in your browser.
 
 **Live site:** https://sterling-smith-ku.github.io/camp-codex-skill-tree/
 
+## How it works
+
+- **Hover** (or tap) a module for its name and description.
+- **Click** a module to unlock it — modules unlock in order along each arm; a module only
+  opens once the one before it is unlocked. Clicking an unlocked module re-locks it (and
+  everything that depended on it).
+- Progress is saved in `localStorage` and survives a refresh. Counters track each branch
+  (n / 7) and the whole tree (n / 21).
+
+## Branches
+
+| Branch | Color | Modules (order 1 → 7) |
+|---|---|---|
+| Creativity | 🔴 `#FF3333` | Curiosity → Burning Questions → (Own the Build → Start Small → Relentless Iteration) ∥ (Demo and Feedback → Portfolio Mindset) |
+| AI Skills | 🟡 `#FFCC00` | LLM Fundamentals → (Coding Agents → Context Engineering → Version Control) ∥ (Skill Building → Superpowers → MCP Connections) |
+| Web & App Design | 🔵 `#33CCFF` | App Anatomy → Front-end vs. Back-end → (APIs → Happy Path → Mermaid Blueprints) ∥ (Design Systems → Automated QA) |
+
+The topology (including the small unlabeled connector nodes) reproduces the approved Mermaid
+diagram in [`docs/superpowers/specs/2026-07-10-skill-tree-v2-build-spec.md`](docs/superpowers/specs/2026-07-10-skill-tree-v2-build-spec.md) one-to-one.
+
 ## What's here
 
-- **`index.html`** — the entire app. Inline CSS + vanilla JS + SVG connectors. No frameworks,
-  no build step, no external/CDN requests.
-- **`camp-codex-skill-tree.md`** — the source content (49 nodes, 57 SP) the page is built from.
-- **`docs/superpowers/`** — the design spec and implementation plan.
-
-## Structure
-
-Four color-coded branches climb from a shared root (**Camp Codex Builder**):
-
-| Branch | Session | SP |
-|---|---|---|
-| 🟡 Foundation | Mindset & frameworks | 13 |
-| 🟢 The Harness | Agentic harnesses | 15 |
-| 🔴 Architecture | How apps work | 14 |
-| 🔵 The Craft | Design & optimization | 15 |
-
-Each branch: a **root** node → two parallel **arms** → a **capstone**. The faint dashed bubbles
-at the top of each branch are **placeholders** for content not yet written.
+- **`index.html`** — the entire app: inline fonts, CSS, data, SVG tree, and interactions.
+  No frameworks, no build step, no network requests at runtime.
+- **`src/data/skillTree.json`** — the module data (id, branch, order, name, description).
+  The same data is inlined in `index.html`; `npm run verify` fails if the two drift apart.
+- **`docs/superpowers/`** — specs, plans, and session handoffs (v1 docs kept for history).
+- **`camp-codex-skill-tree.md`** — v1's source content (the 49-node read-only showcase),
+  kept for provenance. The v1 page itself lives in git history.
 
 ## Run locally
 
-Open `index.html` in any browser — that's it. No server needed.
-
-## Adding nodes later
-
-All content lives in the `TREE_DATA` array (and `BRANCHES` metadata) inside `index.html`.
-To fill a blank top bubble, replace a `placeholder` entry with a real node object
-(`{ id, branch, tier:'arm', arm, label, sp, tooltip }`); the layout and connectors update
-automatically. Keep the running totals (currently 49 nodes / 57 SP) in sync with the header.
-
-Starting a new build session? Read
-[`docs/superpowers/handoff/2026-07-10-next-session.md`](docs/superpowers/handoff/2026-07-10-next-session.md) first.
+Open `index.html` in any browser — no server needed. On viewports under 768px the tree
+becomes three stacked branch lists.
 
 ## Verifying changes
 
 ```bash
-npm install   # first time only — installs Playwright as a devDependency
+npm install     # first time only — installs Playwright as a devDependency
 npm run verify
 ```
 
-Checks node/placeholder/SP counts, tooltip content, console errors, and mobile scroll
-behavior; writes screenshots to `verify-out/` (git-ignored).
+Checks data sync with `src/data/skillTree.json`, node/edge counts against the approved
+topology, verbatim tooltip content for all 21 modules, the sequential unlock rule (including
+cascade re-lock), localStorage persistence, keyboard access, reduced motion, the mobile
+stacked layout, and console errors; writes screenshots to `verify-out/` (git-ignored).
+`node scripts/visual-crops.mjs` produces high-res branch crops for visual review.
