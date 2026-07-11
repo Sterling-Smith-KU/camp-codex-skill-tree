@@ -38,16 +38,11 @@ v1 (the 49-node read-only showcase) no longer exists on the page; it lives in gi
 
 ## 3. How to deploy
 
-- **Vercel (production):** from the repo root, `npx vercel deploy --prod --yes`
-  (CLI is authenticated on this machine as `sterling-smith-ku`). `.vercelignore` keeps
-  node_modules/docs/scripts out of the upload.
-- **GitHub Pages (mirror):** just `git push origin main` — Pages serves the repo root.
-- ⚠️ **Vercel is NOT auto-connected to the GitHub repo.** The CLI tried and failed
-  ("make sure you have access") because Vercel's GitHub app isn't authorized for
-  `Sterling-Smith-KU`. Until that's fixed in the Vercel dashboard (Project → Settings →
-  Git), pushing to GitHub updates *only* the Pages mirror — you must run the Vercel CLI
-  deploy yourself or the two hosts drift. Connecting Git in the dashboard makes every push
-  deploy both, and is the first thing worth doing next session.
+- **`git push origin main` deploys both hosts** (as of 2026-07-11): Vercel is connected
+  to the GitHub repo and auto-deploys on push; GitHub Pages serves the repo root.
+- Manual Vercel deploy (no push needed): `npx vercel deploy --prod --yes` from the repo
+  root (CLI is authenticated on this machine as `sterling-smith-ku`). `.vercelignore`
+  keeps node_modules/docs/scripts out of the upload.
 
 ## 4. How to edit content (most likely future task)
 
@@ -84,8 +79,8 @@ reduced-motion, mobile stack + tap-to-unlock. Both live URLs spot-checked servin
 
 ## 7. Open items (only if asked)
 
-1. **Connect Vercel ↔ GitHub** (dashboard, ~5 min) so pushes auto-deploy — see §3.
-2. Spec §2's v2-of-the-spec item: **Supabase auth + shared persistence** (explicitly out
-   of scope this round; would need a brainstorming pass — it changes the project shape).
+1. ~~Connect Vercel ↔ GitHub~~ — **done 2026-07-11**; pushes to `main` auto-deploy both hosts.
+2. ~~Supabase auth + shared persistence~~ — **dropped 2026-07-11**: the user decided this
+   page needs no accounts. Don't re-propose it.
 3. Custom domain on Vercel, if wanted.
 4. Retiring the Pages mirror if double-hosting ever confuses anyone.

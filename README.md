@@ -61,8 +61,9 @@ stacked layout, and console errors; writes screenshots to `verify-out/` (git-ign
 
 ## Deploying
 
-- **Vercel (production):** `npx vercel deploy --prod --yes`
-- **GitHub Pages (mirror):** `git push origin main`
+`git push origin main` deploys both hosts: Vercel is connected to the GitHub repo
+(auto-deploys on push) and GitHub Pages serves the repo root. For a manual Vercel
+deploy without pushing, `npx vercel deploy --prod --yes` still works.
 
 Picking this up in a new session? Read
 [`docs/superpowers/handoff/2026-07-10-transition.md`](docs/superpowers/handoff/2026-07-10-transition.md) first.
