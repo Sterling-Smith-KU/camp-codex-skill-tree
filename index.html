@@ -161,6 +161,8 @@ body {
 .node.shake { animation: node-shake 0.3s ease; }
 .node.decorative circle { fill: var(--locked-fill); stroke: var(--locked-stroke); stroke-opacity: 0.8; }
 .node.root-node circle { fill: transparent; stroke: var(--root); }
+.node.root-node text { fill: rgba(255, 255, 255, 0.92); }
+.node.root-node.hovered circle { filter: drop-shadow(var(--unlocked-glow) rgba(255, 255, 255, 0.45)); }
 
 @keyframes node-pulse {
   0% { transform: scale(1); }
@@ -208,6 +210,15 @@ body {
   outline: 2px solid var(--node-color);
   outline-offset: 3px;
 }
+.hit-layer a.root-link {
+  position: absolute;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.hit-layer a.root-link:focus-visible {
+  outline: 2px solid var(--root);
+  outline-offset: 3px;
+}
 
 /* ---------- tooltip ---------- */
 .tooltip {
@@ -225,6 +236,7 @@ body {
   pointer-events: none;
 }
 .tooltip.show { opacity: 1; visibility: visible; }
+.tooltip.wide { max-width: 360px; }
 .tooltip .tt-name {
   font-family: var(--font-display);
   font-size: 15px;
@@ -334,6 +346,19 @@ body {
   }
   .m-node.unlocked .m-name { color: var(--root); }
   .m-node.shake { animation: node-shake 0.3s ease; }
+  .mobile-root { --node-color: var(--root); }
+  .mobile-root h2 a {
+    color: var(--root);
+    text-decoration: none;
+  }
+  .mobile-root h2 a:hover, .mobile-root h2 a:focus-visible { text-decoration: underline; }
+  .m-root-desc {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
+    padding: 8px 4px 0;
+  }
 }
 
 /* ---------- reduced motion ---------- */
@@ -416,7 +441,7 @@ const BRANCHES = {
 /* Every node in the approved Mermaid render.
    kind: module (one of the 21) | connector (decorative, always locked, no tooltip) | root */
 const NODES = {
-  "root":                  { x: 580,  y: 1245, d: 40, kind: "root" },
+  "root":                  { x: 580,  y: 1245, d: 76, kind: "root" },
 
   /* Creativity (red, left). In-arm (Own the Build chain) renders LEFT, out-arm RIGHT — as approved. */
   "curiosity":             { x: 190,  y: 1055, d: 58, kind: "module", branch: "creativity" },
@@ -494,6 +519,16 @@ for (const [p, c] of EDGES) {
 const MODULES = {};
 for (const m of SKILL_TREE_DATA.modules) MODULES[m.id] = m;
 
+/* The root of the tree is Josh — not a curriculum module, so he lives outside
+   SKILL_TREE_DATA: no unlock state, and clicking him opens his coaching page. */
+const JOSH = {
+  id: "root",
+  name: "Josh Wexler",
+  url: "https://joshwexler.com/coaching/",
+  description: "Raised in New York City by two psychologist parents, Josh built an 18-year career creating products like the Chopra Meditation App and SoulCycle's at-home bike, leading teams, founding and selling a company, and teaching at NYU and Harvard, but always loved working directly with people most. Now Innovator in Residence teaching AI and Creativity at the University of Kansas, he holds a Master's in Clinical Social Work and is pursuing full clinical licensure. That training lets him coach with both product expertise and the clinical judgment to spot when something goes beyond a coaching problem."
+};
+MODULES[JOSH.id] = JOSH;
+
 /* ================= state ================= */
 const STORAGE_KEY = "camp-codex-skill-tree:unlocked:v2";
 const unlocked = new Set();
@@ -565,6 +600,7 @@ const nodeEls = {};   /* moduleId -> <g.node> */
 const buttonEls = {}; /* moduleId -> desktop overlay button */
 const mobileEls = {}; /* moduleId -> mobile row button */
 const mobileLis = {}; /* moduleId -> mobile <li> (for connector tinting) */
+let rootLinkEl = null; /* desktop overlay link for the root (Josh) */
 
 function buildSvg() {
   const gEdges = el("g", { id: "edges" }, svg);
@@ -584,6 +620,15 @@ function buildSvg() {
     if (n.kind === "root") {
       const g = el("g", { class: "node root-node", "data-node": id }, gNodes);
       el("circle", { cx: n.x, cy: n.y, r: n.d / 2 }, g);
+      const { lines, size } = wrapLabel(JOSH.name, n.d);
+      const lh = size * 1.18;
+      const text = el("text", { x: n.x, y: n.y, "font-size": size }, g);
+      const y0 = n.y - ((lines.length - 1) / 2) * lh + size * 0.34;
+      lines.forEach((line, i) => {
+        const t = el("tspan", { x: n.x, y: y0 + i * lh }, text);
+        t.textContent = line;
+      });
+      nodeEls[id] = g; /* fit-pass only; render() never touches the root */
       continue;
     }
     if (n.kind === "connector") {
@@ -635,6 +680,21 @@ function buildSvg() {
     hitLayer.appendChild(b);
     buttonEls[m.id] = b;
   }
+
+  /* root = Josh: a real link (new tab), not an unlock button */
+  const n = NODES[JOSH.id];
+  const a = document.createElement("a");
+  a.className = "root-link";
+  a.href = JOSH.url;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.setAttribute("aria-label", `${JOSH.name}. ${JOSH.description} Opens joshwexler.com in a new tab.`);
+  a.style.left = ((n.x - n.d / 2) / VB.w * 100) + "%";
+  a.style.top = ((n.y - n.d / 2) / VB.h * 100) + "%";
+  a.style.width = (n.d / VB.w * 100) + "%";
+  a.style.height = (n.d / VB.h * 100) + "%";
+  hitLayer.appendChild(a);
+  rootLinkEl = a;
 }
 
 function buildMobile() {
@@ -675,6 +735,24 @@ function buildMobile() {
     section.append(header, ol);
     stack.appendChild(section);
   }
+
+  /* root = Josh at the bottom of the stack; no hover on touch, so the bio is inline */
+  const section = document.createElement("section");
+  section.className = "mobile-branch mobile-root";
+  const header = document.createElement("header");
+  const h2 = document.createElement("h2");
+  const a = document.createElement("a");
+  a.href = JOSH.url;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = JOSH.name;
+  h2.appendChild(a);
+  header.appendChild(h2);
+  const p = document.createElement("p");
+  p.className = "m-root-desc";
+  p.textContent = JOSH.description;
+  section.append(header, p);
+  stack.appendChild(section);
 }
 
 /* ================= rendering state to the DOM ================= */
@@ -725,6 +803,7 @@ function showTooltip(id, anchor, blocked) {
   const m = MODULES[id];
   ttName.textContent = m.name;
   ttDesc.textContent = m.description;
+  tooltip.classList.toggle("wide", id === JOSH.id); /* Josh's bio needs more room */
   tooltip.classList.toggle("blocked", !!blocked);
   tooltip.classList.add("show");
   tooltipFor = id;
@@ -830,6 +909,16 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLabels)
 else fitLabels();
 for (const id in buttonEls) wireButton(buttonEls[id]);
 for (const id in mobileEls) wireButton(mobileEls[id]);
+rootLinkEl.addEventListener("mouseenter", () => {
+  showTooltip(JOSH.id, rootLinkEl, false);
+  nodeEls[JOSH.id].classList.add("hovered");
+});
+rootLinkEl.addEventListener("mouseleave", () => {
+  hideTooltip();
+  nodeEls[JOSH.id].classList.remove("hovered");
+});
+rootLinkEl.addEventListener("focus", () => showTooltip(JOSH.id, rootLinkEl, false));
+rootLinkEl.addEventListener("blur", hideTooltip);
 document.addEventListener("pointerdown", e => {
   if (tooltipFor && !e.target.closest("button[data-id]")) hideTooltip();
 });

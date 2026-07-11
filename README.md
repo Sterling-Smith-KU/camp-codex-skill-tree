@@ -15,6 +15,10 @@ click-to-unlock progression that persists in your browser.
   everything that depended on it).
 - Progress is saved in `localStorage` and survives a refresh. Counters track each branch
   (n / 7) and the whole tree (n / 21).
+- The root of the tree is **Josh Wexler** — hover for his bio; clicking opens
+  [joshwexler.com/coaching](https://joshwexler.com/coaching/) in a new tab. (On mobile his
+  bio appears inline at the bottom of the stacked list.) He is not part of the unlock
+  progression.
 
 ## Branches
 

@@ -99,6 +99,27 @@ for (const m of canonicalData.modules) {
 }
 check('tooltips verbatim + on-screen for all 21', tipMismatches.length === 0, tipMismatches.join(', '));
 
+/* ---------- 4b. root node = Josh Wexler (label, tooltip, coaching link) ---------- */
+const josh = await page.evaluate(() => {
+  const a = document.querySelector('#hit-layer a.root-link');
+  const label = [...document.querySelectorAll('#tree-svg g.node.root-node tspan')].map(t => t.textContent).join(' ');
+  return a && { href: a.href, target: a.target, rel: a.rel, label };
+});
+check('root link -> joshwexler.com/coaching, new tab', !!josh
+  && josh.href === 'https://joshwexler.com/coaching/' && josh.target === '_blank' && josh.rel === 'noopener');
+check('root labeled Josh Wexler', josh && josh.label === 'Josh Wexler', josh && josh.label);
+await page.hover('#hit-layer a.root-link');
+await page.waitForTimeout(60);
+const joshTipName = await page.locator('#tooltip.show .tt-name').textContent();
+const joshTipDesc = await page.locator('#tooltip.show .tt-desc').textContent();
+check('Josh tooltip name', joshTipName === 'Josh Wexler', joshTipName);
+check('Josh tooltip bio verbatim', joshTipDesc.startsWith('Raised in New York City by two psychologist parents')
+  && joshTipDesc.endsWith('goes beyond a coaching problem.'), (joshTipDesc || '').slice(0, 60));
+const joshTipBox = await page.locator('#tooltip').boundingBox();
+check('Josh tooltip on-screen', joshTipBox && joshTipBox.x >= 0 && joshTipBox.y >= 0
+  && joshTipBox.x + joshTipBox.width <= 1440 && joshTipBox.y + joshTipBox.height <= 1000);
+await page.mouse.move(720, 10);
+
 /* ---------- 5. sequential unlock rule ---------- */
 const totalCount = () => page.locator('#total-count').innerText();
 const pressed = id => page.getAttribute(`#hit-layer button[data-id="${id}"]`, 'aria-pressed');
@@ -167,10 +188,11 @@ const mob = await m.evaluate(() => ({
   scrollW: document.documentElement.scrollWidth,
   winW: window.innerWidth,
   treeHidden: getComputedStyle(document.querySelector('.tree-wrap')).display === 'none',
-  sections: document.querySelectorAll('.mobile-branch').length,
+  sections: document.querySelectorAll('.mobile-branch:not(.mobile-root)').length,
+  rootSections: document.querySelectorAll('.mobile-branch.mobile-root').length,
 }));
 check('mobile: no horizontal scroll', mob.scrollW <= mob.winW + 1, `${mob.scrollW} > ${mob.winW}`);
-check('mobile: tree hidden, 3 stacked branches', mob.treeHidden && mob.sections === 3);
+check('mobile: tree hidden, 3 stacked branches + Josh root', mob.treeHidden && mob.sections === 3 && mob.rootSections === 1);
 await m.evaluate(() => localStorage.clear());
 await m.reload({ waitUntil: 'networkidle' });
 await m.waitForTimeout(200);
@@ -181,6 +203,13 @@ const mTip = await m.locator('#tooltip.show').count();
 check('mobile: tap unlocks + shows tooltip', mUnlocked === 'true' && mTip === 1);
 const mCount = await m.locator('[data-m-branch-count="web-app-design"]').innerText();
 check('mobile: branch counter updates', mCount === '1 / 7');
+const mJosh = await m.evaluate(() => {
+  const a = document.querySelector('.mobile-root h2 a');
+  const desc = document.querySelector('.mobile-root .m-root-desc');
+  return a && desc && { href: a.href, name: a.textContent, hasBio: desc.textContent.length > 100 };
+});
+check('mobile: Josh section with link + inline bio', !!mJosh
+  && mJosh.href === 'https://joshwexler.com/coaching/' && mJosh.name === 'Josh Wexler' && mJosh.hasBio);
 await m.screenshot({ path: join(outDir, 'mobile.png'), fullPage: true });
 
 /* ---------- 10. reduced motion smoke test ---------- */
