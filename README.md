@@ -4,7 +4,8 @@ An interactive, self-contained web page that renders the **Camp Codex curriculum
 game-style skill tree: three color-coded branches growing from a shared root, 21 modules,
 click-to-unlock progression that persists in your browser.
 
-**Live site:** https://sterling-smith-ku.github.io/camp-codex-skill-tree/
+**Live site:** https://camp-codex-skill-tree.vercel.app
+(mirror: https://sterling-smith-ku.github.io/camp-codex-skill-tree/)
 
 ## How it works
 
@@ -53,3 +54,11 @@ topology, verbatim tooltip content for all 21 modules, the sequential unlock rul
 cascade re-lock), localStorage persistence, keyboard access, reduced motion, the mobile
 stacked layout, and console errors; writes screenshots to `verify-out/` (git-ignored).
 `node scripts/visual-crops.mjs` produces high-res branch crops for visual review.
+
+## Deploying
+
+- **Vercel (production):** `npx vercel deploy --prod --yes`
+- **GitHub Pages (mirror):** `git push origin main`
+
+Picking this up in a new session? Read
+[`docs/superpowers/handoff/2026-07-10-transition.md`](docs/superpowers/handoff/2026-07-10-transition.md) first.
