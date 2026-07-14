@@ -35,8 +35,8 @@ diagram in [`docs/superpowers/specs/2026-07-10-skill-tree-v2-build-spec.md`](doc
 
 - **Light / dark mode** — a toggle in the header flips the palette; choice is persisted in
   `localStorage`. Dark is the default.
-- **Scrolling "Built with" footer** — a marquee of ten monochrome tool logos (Claude,
-  Notion, Supabase, Cursor, Stitch, VS Code, GitHub, YouTube, ChatGPT, Anthropic).
+- **Scrolling "Built with" footer** — a marquee of ten monochrome tool logos (OpenAI,
+  Anthropic, Gemini, Notion, Supabase, Mermaid, Google Stitch, VS Code, GitHub, YouTube).
 
 ## What's here
 

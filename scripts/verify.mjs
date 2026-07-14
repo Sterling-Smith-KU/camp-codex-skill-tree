@@ -187,6 +187,7 @@ await page.screenshot({ path: join(outDir, 'light.png'), fullPage: true });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(300);
 check('light persists across reload', (await themeAttr()) === 'light');
+check('toggle reflects hydrated light theme', (await page.getAttribute('#theme-toggle', 'aria-pressed')) === 'true');
 check('unlock state independent of theme', (await totalCount()) === '3');
 await page.click('#theme-toggle');
 await page.waitForTimeout(100);
