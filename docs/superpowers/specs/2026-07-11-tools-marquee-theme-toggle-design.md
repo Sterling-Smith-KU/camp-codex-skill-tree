@@ -76,8 +76,9 @@ OpenAI, Anthropic, Gemini, Notion, Supabase, Mermaid, Google Stitch, VS Code, Gi
 
 ### Mechanism
 - `html[data-theme="light"]` attribute drives everything; absence = dark (canonical).
-- Persist under localStorage key `campCodexTheme` (value `"light"` — key is **separate**
-  from the unlock-state key).
+- Persist under localStorage key `camp-codex-skill-tree:theme` (value `"light"`; key
+  removed when back on dark — follows the naming of the existing unlock-state key and is
+  **separate** from it).
 - Tiny inline `<script>` in `<head>` (before the `<style>` block) reads the key and sets
   the attribute before first paint — no flash of wrong theme.
 - Toggle click flips the attribute and writes/removes the key.
