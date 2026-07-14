@@ -14,8 +14,6 @@
 | Repo | https://github.com/Sterling-Smith-KU/camp-codex-skill-tree (`main`) |
 | Vercel project | `sterlingdemo/camp-codex-skill-tree` (account `sterling-smith-ku`) |
 
-**2026-07-13**: Added a light/dark theme toggle (`#theme-toggle`, localStorage-persisted, dark default) and a scrolling "Built with" logo footer (`.tools-marquee`, ten monochrome tool marks). Spec: [`../specs/2026-07-11-tools-marquee-theme-toggle-design.md`](../specs/2026-07-11-tools-marquee-theme-toggle-design.md). Implementation plan: [`../plans/2026-07-11-tools-marquee-theme-toggle.md`](../plans/2026-07-11-tools-marquee-theme-toggle.md).
-
 v2 is **shipped, verified, and live on both hosts**. It is the interactive 21-module skill
 tree from the approved build spec
 ([`../specs/2026-07-10-skill-tree-v2-build-spec.md`](../specs/2026-07-10-skill-tree-v2-build-spec.md)):
@@ -23,6 +21,8 @@ three branches (Creativity `#FF3333` / AI Skills `#FFCC00` / Web & App Design `#
 the spec's exact Mermaid topology, click-to-unlock with the sequential rule, cascade
 re-lock, localStorage persistence, branch + total counters, verbatim tooltips, keyboard and
 reduced-motion support, and a stacked mobile layout under 768px.
+
+**2026-07-13**: Added a light/dark theme toggle (`#theme-toggle`, localStorage-persisted, dark default) and a scrolling "Built with" logo footer (`.tools-marquee`, ten monochrome tool marks). Spec: [`../specs/2026-07-11-tools-marquee-theme-toggle-design.md`](../specs/2026-07-11-tools-marquee-theme-toggle-design.md). Implementation plan: [`../plans/2026-07-13-tools-marquee-theme-toggle.md`](../plans/2026-07-13-tools-marquee-theme-toggle.md).
 
 v1 (the 49-node read-only showcase) no longer exists on the page; it lives in git history
 (`git show 0dea458:index.html`) with its own docs kept under `docs/superpowers/`.
