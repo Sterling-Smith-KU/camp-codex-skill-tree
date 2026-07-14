@@ -125,6 +125,25 @@ body {
   text-transform: uppercase;
   color: var(--ink-muted);
 }
+.header-tools { display: flex; align-items: flex-end; gap: 14px; }
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--locked-stroke);
+  background: transparent;
+  color: var(--ink-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.theme-toggle:hover { color: var(--root); border-color: var(--root); }
+.theme-toggle:focus-visible { outline: 2px solid var(--root); outline-offset: 2px; }
+.theme-toggle svg { width: 18px; height: 18px; }
+.theme-toggle .icon-sun { display: none; }
+html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 
 /* ---------- tree canvas ---------- */
 .tree-wrap {
@@ -420,9 +439,15 @@ body {
     <h1>Camp Codex Skill Tree</h1>
     <p class="subtitle">Three branches, 21 modules. Click a module to unlock it — each one opens the next.</p>
   </div>
-  <div class="total-counter">
-    <span class="num"><span id="total-count">0</span> / 21</span>
-    <span class="lbl">Modules unlocked</span>
+  <div class="header-tools">
+    <div class="total-counter">
+      <span class="num"><span id="total-count">0</span> / 21</span>
+      <span class="lbl">Modules unlocked</span>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
   </div>
 </header>
 
@@ -940,10 +965,33 @@ function fitLabels() {
   }
 }
 
+/* ================= theme toggle ================= */
+const THEME_KEY = "camp-codex-skill-tree:theme";
+function initThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  const sync = () => {
+    const light = document.documentElement.dataset.theme === "light";
+    btn.setAttribute("aria-pressed", String(light));
+    btn.setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
+  };
+  btn.addEventListener("click", () => {
+    if (document.documentElement.dataset.theme === "light") {
+      delete document.documentElement.dataset.theme;
+      try { localStorage.removeItem(THEME_KEY); } catch (e) { /* ignore */ }
+    } else {
+      document.documentElement.dataset.theme = "light";
+      try { localStorage.setItem(THEME_KEY, "light"); } catch (e) { /* ignore */ }
+    }
+    sync();
+  });
+  sync();
+}
+
 /* ================= boot ================= */
 buildSvg();
 buildMobile();
 loadState();
+initThemeToggle();
 render();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLabels);
 else fitLabels();
