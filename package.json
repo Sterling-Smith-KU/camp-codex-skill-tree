@@ -6,6 +6,7 @@
     "verify": "node scripts/verify.mjs"
   },
   "devDependencies": {
-    "playwright": "^1.61.1"
+    "playwright": "^1.61.1",
+    "simple-icons": "^16.26.0"
   }
 }
