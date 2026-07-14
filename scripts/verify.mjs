@@ -193,6 +193,30 @@ await page.waitForTimeout(100);
 check('toggle back to dark', (await themeAttr()) === null && (await bodyBg()) === 'rgb(11, 14, 20)');
 check('theme key cleared on dark', (await page.evaluate(k => localStorage.getItem(k), THEME_KEY)) === null);
 
+/* ---------- 7c. tools marquee ---------- */
+const canonicalLogos = JSON.parse(readFileSync(join(here, '..', 'src', 'data', 'toolLogos.json'), 'utf8'));
+const logoData = await page.evaluate(() => window.TOOL_LOGOS);
+check('marquee data matches src/data/toolLogos.json', stable(logoData) === stable(canonicalLogos));
+const mq = await page.evaluate(() => {
+  const track = document.querySelector('.tools-marquee #marquee-track');
+  const groups = [...document.querySelectorAll('.marquee-group')];
+  const cs = track && getComputedStyle(track);
+  return track && {
+    groups: groups.length,
+    perGroup: groups.map(g => g.querySelectorAll('.tool-logo').length),
+    labels: [...groups[0].querySelectorAll('.tool-logo')].map(s => s.getAttribute('aria-label')),
+    secondHidden: groups[1] && groups[1].getAttribute('aria-hidden') === 'true',
+    animation: cs.animationName,
+    playState: cs.animationPlayState,
+    label: document.querySelector('.marquee-label').textContent.trim(),
+  };
+});
+check('marquee: 2 groups of 10 logos', !!mq && mq.groups === 2 && mq.perGroup[0] === 10 && mq.perGroup[1] === 10);
+check('marquee: all 10 tools in order', !!mq && stable(mq.labels) === stable(['OpenAI', 'Anthropic', 'Gemini', 'Notion', 'Supabase', 'Mermaid', 'Google Stitch', 'VS Code', 'GitHub', 'YouTube']));
+check('marquee: duplicate group aria-hidden', !!mq && mq.secondHidden === true);
+check('marquee: animation running', !!mq && mq.animation === 'marquee-scroll' && mq.playState === 'running');
+check('marquee: label text', !!mq && mq.label === 'Built with');
+
 /* ---------- 8. desktop screenshot ---------- */
 await page.mouse.move(720, 10);
 await page.waitForTimeout(300);
@@ -211,9 +235,11 @@ const mob = await m.evaluate(() => ({
   treeHidden: getComputedStyle(document.querySelector('.tree-wrap')).display === 'none',
   sections: document.querySelectorAll('.mobile-branch:not(.mobile-root)').length,
   rootSections: document.querySelectorAll('.mobile-branch.mobile-root').length,
+  marqueeVisible: !!document.querySelector('.tools-marquee') && getComputedStyle(document.querySelector('.tools-marquee')).display !== 'none',
 }));
 check('mobile: no horizontal scroll', mob.scrollW <= mob.winW + 1, `${mob.scrollW} > ${mob.winW}`);
 check('mobile: tree hidden, 3 stacked branches + Josh root', mob.treeHidden && mob.sections === 3 && mob.rootSections === 1);
+check('mobile: marquee present', mob.marqueeVisible);
 await m.evaluate(() => localStorage.clear());
 await m.reload({ waitUntil: 'networkidle' });
 await m.waitForTimeout(200);
@@ -243,6 +269,8 @@ await rm.reload({ waitUntil: 'networkidle' });
 await rm.click('#hit-layer button[data-id="curiosity"]');
 await rm.waitForTimeout(200);
 check('reduced-motion unlock works', (await rm.getAttribute('#hit-layer button[data-id="curiosity"]', 'aria-pressed')) === 'true');
+const rmMarquee = await rm.evaluate(() => getComputedStyle(document.getElementById('marquee-track')).animationName);
+check('reduced-motion: marquee static', rmMarquee === 'none');
 await rmCtx.close();
 
 /* ---------- report ---------- */
