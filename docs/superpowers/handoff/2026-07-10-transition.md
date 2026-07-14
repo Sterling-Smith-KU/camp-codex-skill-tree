@@ -14,6 +14,8 @@
 | Repo | https://github.com/Sterling-Smith-KU/camp-codex-skill-tree (`main`) |
 | Vercel project | `sterlingdemo/camp-codex-skill-tree` (account `sterling-smith-ku`) |
 
+**2026-07-13**: Added a light/dark theme toggle (`#theme-toggle`, localStorage-persisted, dark default) and a scrolling "Built with" logo footer (`.tools-marquee`, ten monochrome tool marks). Spec: [`../specs/2026-07-11-tools-marquee-theme-toggle-design.md`](../specs/2026-07-11-tools-marquee-theme-toggle-design.md). Implementation plan: [`../plans/2026-07-11-tools-marquee-theme-toggle.md`](../plans/2026-07-11-tools-marquee-theme-toggle.md).
+
 v2 is **shipped, verified, and live on both hosts**. It is the interactive 21-module skill
 tree from the approved build spec
 ([`../specs/2026-07-10-skill-tree-v2-build-spec.md`](../specs/2026-07-10-skill-tree-v2-build-spec.md)):
@@ -57,6 +59,9 @@ v1 (the 49-node read-only showcase) no longer exists on the page; it lives in gi
 4. `node scripts/visual-crops.mjs` for high-res crops; eyeball labels fit inside circles
    (a runtime fit-pass shrinks overflowing labels, but check anyway).
 5. Commit, push (Pages), and `npx vercel deploy --prod --yes` (Vercel).
+6. **Tool logos** live in `src/data/toolLogos.json` and are mirrored by the inline
+   `TOOL_LOGOS` constant near the top of the `<script>` in `index.html`. The same
+   drift rule as `skillTree.json` applies: edit both, then run `npm run verify`.
 
 ## 5. Verification status at handoff
 

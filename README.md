@@ -31,6 +31,13 @@ click-to-unlock progression that persists in your browser.
 The topology (including the small unlabeled connector nodes) reproduces the approved Mermaid
 diagram in [`docs/superpowers/specs/2026-07-10-skill-tree-v2-build-spec.md`](docs/superpowers/specs/2026-07-10-skill-tree-v2-build-spec.md) one-to-one.
 
+## Features
+
+- **Light / dark mode** — a toggle in the header flips the palette; choice is persisted in
+  `localStorage`. Dark is the default.
+- **Scrolling "Built with" footer** — a marquee of ten monochrome tool logos (Claude,
+  Notion, Supabase, Cursor, Stitch, VS Code, GitHub, YouTube, ChatGPT, Anthropic).
+
 ## What's here
 
 - **`index.html`** — the entire app: inline fonts, CSS, data, SVG tree, and interactions.

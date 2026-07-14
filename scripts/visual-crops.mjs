@@ -39,5 +39,19 @@ await page.hover('#hit-layer button[data-id="context-engineering"]');
 await page.waitForTimeout(250);
 await page.screenshot({ path: join(out, 'crop-tooltip.png'), clip: clip(300, 560, 620, 320) });
 
+// marquee footer + light mode + header toggle
+await page.mouse.move(720, 5);
+await page.locator('.tools-marquee').scrollIntoViewIfNeeded();
+await page.waitForTimeout(300);
+const mqBox = await page.locator('.tools-marquee').boundingBox();
+await page.screenshot({ path: join(out, 'crop-marquee-dark.png'), clip: mqBox });
+await page.click('#theme-toggle');
+await page.waitForTimeout(400);
+await page.screenshot({ path: join(out, 'crop-marquee-light.png'), clip: mqBox });
+await page.screenshot({ path: join(out, 'light-full.png'), fullPage: true });
+const hdrBox = await page.locator('.site-header').boundingBox();
+await page.screenshot({ path: join(out, 'crop-header-light.png'), clip: hdrBox });
+await page.click('#theme-toggle'); // leave the page (and stored key) on dark
+
 await browser.close();
 console.log('crops written to ' + out);
