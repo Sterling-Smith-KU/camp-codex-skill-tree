@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camp Codex Skill Tree</title>
-<meta name="description" content="Interactive skill tree for the Camp Codex curriculum — three branches, 21 modules, click to unlock.">
+<meta name="description" content="Interactive skill tree for the Camp Codex curriculum — three branches, 21 modules.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23FFCC00' stroke-width='3'/%3E%3C/svg%3E">
 <script>
 /* pre-paint theme hydration — must run before the stylesheet applies so there is no flash */
@@ -108,23 +108,6 @@ body {
   color: var(--ink-muted);
   margin-top: 4px;
 }
-.total-counter {
-  text-align: right;
-  font-family: var(--font-display);
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-.total-counter .num {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--root);
-}
-.total-counter .lbl {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
 .header-tools { display: flex; align-items: flex-end; gap: 14px; }
 .theme-toggle {
   width: 38px;
@@ -207,8 +190,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
   transition: fill 0.25s ease;
   pointer-events: none;
 }
-.node.available circle { stroke: var(--node-color); }
-.node.available text { fill: var(--node-text-bright); }
 .node.unlocked circle {
   fill: var(--node-color);
   stroke: var(--node-color);
@@ -216,24 +197,10 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 }
 .node.unlocked text { fill: var(--surface-ink); }
 .node.hovered { transform: scale(1.06); }
-.node.pulse { animation: node-pulse 0.25s ease-out; }
-.node.shake { animation: node-shake 0.3s ease; }
 .node.decorative circle { fill: var(--locked-fill); stroke: var(--locked-stroke); stroke-opacity: 0.8; }
 .node.root-node circle { fill: transparent; stroke: var(--root); }
 .node.root-node text { fill: var(--node-text-bright); }
 .node.root-node.hovered circle { filter: drop-shadow(var(--unlocked-glow) var(--root-hover-glow)); }
-
-@keyframes node-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-@keyframes node-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  50% { transform: translateX(4px); }
-  75% { transform: translateX(-3px); }
-}
 
 /* branch base labels */
 .branch-chip-bg { fill: var(--bg); fill-opacity: 0.88; }
@@ -246,15 +213,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
   fill: var(--ink);
   text-anchor: middle;
 }
-.branch-count {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  fill: var(--node-text-color, var(--node-color));
-  text-anchor: middle;
-}
-
 /* button overlay (accessibility + all pointer input) */
 .hit-layer { position: absolute; inset: 0; }
 .hit-layer button {
@@ -309,15 +267,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
   font-size: 13px;
   line-height: 1.5;
 }
-.tooltip .tt-hint {
-  margin-top: 8px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  display: none;
-}
-.tooltip.blocked .tt-hint { display: block; }
-
 /* ---------- mobile stacked layout ---------- */
 .mobile-stack { display: none; }
 
@@ -346,12 +295,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--node-text-color, var(--node-color));
-  }
-  .mobile-branch .m-count {
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 700;
     color: var(--node-text-color, var(--node-color));
   }
   .mobile-branch ol { list-style: none; }
@@ -396,15 +339,12 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
     color: var(--node-text);
     transition: color 0.25s ease;
   }
-  .m-node.available .m-dot { border-color: var(--node-color); }
-  .m-node.available .m-name { color: var(--node-text-bright); }
   .m-node.unlocked .m-dot {
     background: var(--node-color);
     border-color: var(--node-color);
     box-shadow: var(--unlocked-glow) var(--node-glow);
   }
   .m-node.unlocked .m-name { color: var(--root); }
-  .m-node.shake { animation: node-shake 0.3s ease; }
   .mobile-root { --node-color: var(--root); }
   .mobile-root h2 a {
     color: var(--root);
@@ -461,7 +401,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .node.pulse, .node.shake, .m-node.shake { animation: none; }
   .node.hovered { transform: none; }
   .node circle, .node text, .edge-core, .edge-halo, .m-node .m-dot, .m-node .m-name {
     transition-duration: 0.01ms;
@@ -477,13 +416,9 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 <header class="site-header">
   <div>
     <h1>Camp Codex Skill Tree</h1>
-    <p class="subtitle">Three branches, 21 modules. Click a module to unlock it — each one opens the next.</p>
+    <p class="subtitle">Three branches, 21 modules. Hover or tap a module to read it.</p>
   </div>
   <div class="header-tools">
-    <div class="total-counter">
-      <span class="num"><span id="total-count">0</span> / 21</span>
-      <span class="lbl">Modules unlocked</span>
-    </div>
     <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light mode">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -504,7 +439,6 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 <div class="tooltip" id="tooltip" role="tooltip">
   <div class="tt-name"></div>
   <div class="tt-desc"></div>
-  <div class="tt-hint">Unlock the previous module first.</div>
 </div>
 
 <footer class="tools-marquee">
@@ -518,27 +452,27 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 /* ================= data (mirrors src/data/skillTree.json verbatim) ================= */
 const SKILL_TREE_DATA = {
   modules: [
-    { id: "curiosity", branch: "creativity", order: 1, name: "Curiosity", description: "Test new tools quickly to see if they're valuable instead of getting wrapped up in the hype.", unlocked: false },
-    { id: "burning-questions", branch: "creativity", order: 2, name: "Burning Questions", description: "Bring sharp questions to every session and ask AI what project would teach you what you want.", unlocked: false },
-    { id: "own-the-build", branch: "creativity", order: 3, name: "Own the Build", description: "Treat AI as a co-creative partner while you steer, so the vision and decisions stay yours.", unlocked: false },
-    { id: "start-small", branch: "creativity", order: 4, name: "Start Small", description: "Scope tightly and resist grandiose visions, because AI will happily over-build and burn your token budget.", unlocked: false },
-    { id: "relentless-iteration", branch: "creativity", order: 5, name: "Relentless Iteration", description: "Build, fail, and refine constantly. Credits reset, so take risks and learn through the reps.", unlocked: false },
-    { id: "demo-and-feedback", branch: "creativity", order: 6, name: "Demo and Feedback", description: "Show working progress weekly and sharpen your builds through group critique, like forced pauses and blank-state handling.", unlocked: false },
-    { id: "portfolio-mindset", branch: "creativity", order: 7, name: "Portfolio Mindset", description: "Ship projects worth showcasing, then publish them publicly so your work markets itself to future opportunities.", unlocked: false },
-    { id: "llm-fundamentals", branch: "ai-skills", order: 1, name: "LLM Fundamentals", description: "Understand the stochastic machine underneath. It predicts the next token, so design around that, not around intelligence.", unlocked: false },
-    { id: "coding-agents", branch: "ai-skills", order: 2, name: "Coding Agents", description: "Wield harnesses like Claude Code and Codex that wrap an LLM with file access and tools.", unlocked: false },
-    { id: "context-engineering", branch: "ai-skills", order: 3, name: "Context Engineering", description: "Keep context under 40 percent, clear it often, and decompose tasks so the agent never loses the plot.", unlocked: false },
-    { id: "version-control", branch: "ai-skills", order: 4, name: "Version Control", description: "Track every change in GitHub and run Claude Code from the VS Code terminal to dodge path errors.", unlocked: false },
-    { id: "skill-building", branch: "ai-skills", order: 5, name: "Skill Building", description: "Encode repeatable workflows as markdown skill files, reusable protocols the agent follows every single time.", unlocked: false },
-    { id: "superpowers", branch: "ai-skills", order: 6, name: "Superpowers", description: "Install a full software development methodology into your agent, with planning, briefs, and composable skills built in.", unlocked: false },
-    { id: "mcp-connections", branch: "ai-skills", order: 7, name: "MCP Connections", description: "Connect agents to GitHub, Notion, Chrome DevTools, and design tools so AI operates your whole stack.", unlocked: false },
-    { id: "app-anatomy", branch: "web-app-design", order: 1, name: "App Anatomy", description: "See the request-response cycle: browser asks, server hits the database, and HTML, CSS, and JavaScript render.", unlocked: false },
-    { id: "front-end-vs-back-end", branch: "web-app-design", order: 2, name: "Front-end vs. Back-end", description: "Separate the rendered interface from the logic and data, and know when a static site needs neither.", unlocked: false },
-    { id: "apis", branch: "web-app-design", order: 3, name: "APIs", description: "Outsource hard problems like auth and databases to services instead of dangerously rolling your own.", unlocked: false },
-    { id: "happy-path", branch: "web-app-design", order: 4, name: "Happy Path", description: "Talk through the ideal user journey out loud, transcribe it, and feed it in as your first requirements.", unlocked: false },
-    { id: "mermaid-blueprints", branch: "web-app-design", order: 5, name: "Mermaid Blueprints", description: "Diagram architecture as text so AI reads exact connections instead of misinterpreting a picture.", unlocked: false },
-    { id: "design-systems", branch: "web-app-design", order: 6, name: "Design Systems", description: "Use Google Stitch palettes and ShadCN components to escape the generic AI-generated look.", unlocked: false },
-    { id: "automated-qa", branch: "web-app-design", order: 7, name: "Automated QA", description: "Test in real Chrome via DevTools MCP and hunt CSS conflicts when a style change won't stick.", unlocked: false }
+    { id: "curiosity", branch: "creativity", order: 1, name: "Curiosity", description: "Test new tools quickly to see if they're valuable instead of getting wrapped up in the hype." },
+    { id: "burning-questions", branch: "creativity", order: 2, name: "Burning Questions", description: "Bring sharp questions to every session and ask AI what project would teach you what you want." },
+    { id: "own-the-build", branch: "creativity", order: 3, name: "Own the Build", description: "Treat AI as a co-creative partner while you steer, so the vision and decisions stay yours." },
+    { id: "start-small", branch: "creativity", order: 4, name: "Start Small", description: "Scope tightly and resist grandiose visions, because AI will happily over-build and burn your token budget." },
+    { id: "relentless-iteration", branch: "creativity", order: 5, name: "Relentless Iteration", description: "Build, fail, and refine constantly. Credits reset, so take risks and learn through the reps." },
+    { id: "demo-and-feedback", branch: "creativity", order: 6, name: "Demo and Feedback", description: "Show working progress weekly and sharpen your builds through group critique, like forced pauses and blank-state handling." },
+    { id: "portfolio-mindset", branch: "creativity", order: 7, name: "Portfolio Mindset", description: "Ship projects worth showcasing, then publish them publicly so your work markets itself to future opportunities." },
+    { id: "llm-fundamentals", branch: "ai-skills", order: 1, name: "LLM Fundamentals", description: "Understand the stochastic machine underneath. It predicts the next token, so design around that, not around intelligence." },
+    { id: "coding-agents", branch: "ai-skills", order: 2, name: "Coding Agents", description: "Wield harnesses like Claude Code and Codex that wrap an LLM with file access and tools." },
+    { id: "context-engineering", branch: "ai-skills", order: 3, name: "Context Engineering", description: "Keep context under 40 percent, clear it often, and decompose tasks so the agent never loses the plot." },
+    { id: "version-control", branch: "ai-skills", order: 4, name: "Version Control", description: "Track every change in GitHub and run Claude Code from the VS Code terminal to dodge path errors." },
+    { id: "skill-building", branch: "ai-skills", order: 5, name: "Skill Building", description: "Encode repeatable workflows as markdown skill files, reusable protocols the agent follows every single time." },
+    { id: "superpowers", branch: "ai-skills", order: 6, name: "Superpowers", description: "Install a full software development methodology into your agent, with planning, briefs, and composable skills built in." },
+    { id: "mcp-connections", branch: "ai-skills", order: 7, name: "MCP Connections", description: "Connect agents to GitHub, Notion, Chrome DevTools, and design tools so AI operates your whole stack." },
+    { id: "app-anatomy", branch: "web-app-design", order: 1, name: "App Anatomy", description: "See the request-response cycle: browser asks, server hits the database, and HTML, CSS, and JavaScript render." },
+    { id: "front-end-vs-back-end", branch: "web-app-design", order: 2, name: "Front-end vs. Back-end", description: "Separate the rendered interface from the logic and data, and know when a static site needs neither." },
+    { id: "apis", branch: "web-app-design", order: 3, name: "APIs", description: "Outsource hard problems like auth and databases to services instead of dangerously rolling your own." },
+    { id: "happy-path", branch: "web-app-design", order: 4, name: "Happy Path", description: "Talk through the ideal user journey out loud, transcribe it, and feed it in as your first requirements." },
+    { id: "mermaid-blueprints", branch: "web-app-design", order: 5, name: "Mermaid Blueprints", description: "Diagram architecture as text so AI reads exact connections instead of misinterpreting a picture." },
+    { id: "design-systems", branch: "web-app-design", order: 6, name: "Design Systems", description: "Use Google Stitch palettes and ShadCN components to escape the generic AI-generated look." },
+    { id: "automated-qa", branch: "web-app-design", order: 7, name: "Automated QA", description: "Test in real Chrome via DevTools MCP and hunt CSS conflicts when a style change won't stick." }
   ]
 };
 window.SKILL_TREE_DATA = SKILL_TREE_DATA;
@@ -718,32 +652,6 @@ const JOSH = {
 };
 MODULES[JOSH.id] = JOSH;
 
-/* ================= state ================= */
-const STORAGE_KEY = "camp-codex-skill-tree:unlocked:v2";
-const unlocked = new Set();
-
-function isAvailable(id) {
-  return PARENT[id] === null || unlocked.has(PARENT[id]);
-}
-function loadState() {
-  let saved = [];
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { /* private mode etc. */ }
-  const want = new Set(saved.filter(id => MODULES[id]));
-  /* enforce the sequential invariant on hydrate: a node only counts if its parent chain holds */
-  let grew = true;
-  while (grew) {
-    grew = false;
-    for (const id of want) {
-      if (!unlocked.has(id) && (PARENT[id] === null || unlocked.has(PARENT[id]))) {
-        unlocked.add(id); grew = true;
-      }
-    }
-  }
-}
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...unlocked])); } catch (e) { /* ignore */ }
-}
-
 /* ================= svg build ================= */
 const SVG_NS = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("tree-svg");
@@ -784,11 +692,9 @@ function wrapLabel(name, d) {
   return { lines, size };
 }
 
-const edgeEls = {};   /* childId -> <g.edge> (module children only) */
 const nodeEls = {};   /* moduleId -> <g.node> */
 const buttonEls = {}; /* moduleId -> desktop overlay button */
 const mobileEls = {}; /* moduleId -> mobile row button */
-const mobileLis = {}; /* moduleId -> mobile <li> (for connector tinting) */
 let rootLinkEl = null; /* desktop overlay link for the root (Josh) */
 
 /* ================= tools marquee ================= */
@@ -826,11 +732,11 @@ function buildSvg() {
   for (const [p, c] of EDGES) {
     const a = NODES[p], b = NODES[c];
     const branch = b.branch || a.branch;
-    const g = el("g", { class: "edge", "data-edge": `${p}->${c}`, style: branchVars(branch) }, gEdges);
+    /* edges into modules render lit; edges into decorative connectors stay muted */
+    const g = el("g", { class: NODES[c].kind === "module" ? "edge lit" : "edge", "data-edge": `${p}->${c}`, style: branchVars(branch) }, gEdges);
     const d = edgePath(a, b);
     el("path", { class: "edge-halo", d }, g);
     el("path", { class: "edge-core", d }, g);
-    if (NODES[c].kind === "module") edgeEls[c] = g;
   }
 
   const gNodes = el("g", { id: "nodes" }, svg);
@@ -856,7 +762,7 @@ function buildSvg() {
       continue;
     }
     const m = MODULES[id];
-    const g = el("g", { class: "node module", "data-node": id, style: branchVars(n.branch) }, gNodes);
+    const g = el("g", { class: "node module unlocked", "data-node": id, style: branchVars(n.branch) }, gNodes);
     el("circle", { cx: n.x, cy: n.y, r: n.d / 2 }, g);
     const { lines, size } = wrapLabel(m.name, n.d);
     const lh = size * 1.18;
@@ -880,9 +786,6 @@ function buildSvg() {
     el("rect", { class: "branch-chip-bg", x: n.x - w / 2, y: 1122, width: w, height: 26, rx: 5 }, g);
     const t1 = el("text", { class: "branch-label", x: n.x, y: 1140 }, g);
     t1.textContent = label;
-    el("rect", { class: "branch-chip-bg", x: n.x - 24, y: 1164, width: 48, height: 36, rx: 5 }, g);
-    const t2 = el("text", { class: "branch-count", x: n.x, y: 1192, "data-branch-count": branch }, g);
-    t2.textContent = "0";
   }
 
   /* invisible-but-focusable button per module (all clicks/taps/keys land here) */
@@ -891,6 +794,7 @@ function buildSvg() {
     const b = document.createElement("button");
     b.type = "button";
     b.dataset.id = m.id;
+    b.setAttribute("aria-label", `${m.name}. ${m.description}`);
     b.style.left = ((n.x - n.d / 2) / VB.w * 100) + "%";
     b.style.top = ((n.y - n.d / 2) / VB.h * 100) + "%";
     b.style.width = (n.d / VB.w * 100) + "%";
@@ -925,21 +829,19 @@ function buildMobile() {
     const header = document.createElement("header");
     const h2 = document.createElement("h2");
     h2.textContent = BRANCHES[branch].label;
-    const count = document.createElement("span");
-    count.className = "m-count";
-    count.dataset.mBranchCount = branch;
-    count.textContent = "0 / 7";
-    header.append(h2, count);
+    header.append(h2);
     const ol = document.createElement("ol");
     SKILL_TREE_DATA.modules
       .filter(m => m.branch === branch)
       .sort((a, b) => a.order - b.order)
       .forEach(m => {
         const li = document.createElement("li");
+        li.className = "lit-in";
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "m-node";
+        btn.className = "m-node unlocked";
         btn.dataset.id = m.id;
+        btn.setAttribute("aria-label", `${m.name}. ${m.description}`);
         const dot = document.createElement("span");
         dot.className = "m-dot";
         const name = document.createElement("span");
@@ -949,7 +851,6 @@ function buildMobile() {
         li.appendChild(btn);
         ol.appendChild(li);
         mobileEls[m.id] = btn;
-        mobileLis[m.id] = li;
       });
     section.append(header, ol);
     stack.appendChild(section);
@@ -974,60 +875,21 @@ function buildMobile() {
   stack.appendChild(section);
 }
 
-/* ================= rendering state to the DOM ================= */
-function stateOf(id) {
-  return unlocked.has(id) ? "unlocked" : isAvailable(id) ? "available" : "locked";
-}
-
-function ariaLabel(m) {
-  const s = stateOf(m.id);
-  const status = s === "unlocked" ? "Unlocked." : s === "available" ? "Locked. Click to unlock." : "Locked. Unlock the previous module first.";
-  return `${m.name}. ${m.description} ${status}`;
-}
-
-function render() {
-  for (const m of SKILL_TREE_DATA.modules) {
-    const s = stateOf(m.id);
-    for (const target of [nodeEls[m.id], mobileEls[m.id]]) {
-      target.classList.toggle("unlocked", s === "unlocked");
-      target.classList.toggle("available", s === "available");
-      target.classList.toggle("locked", s === "locked");
-    }
-    mobileLis[m.id].classList.toggle("lit-in", unlocked.has(m.id));
-    if (edgeEls[m.id]) edgeEls[m.id].classList.toggle("lit", unlocked.has(m.id));
-    const b = buttonEls[m.id];
-    b.setAttribute("aria-pressed", unlocked.has(m.id) ? "true" : "false");
-    b.setAttribute("aria-label", ariaLabel(m));
-    mobileEls[m.id].setAttribute("aria-pressed", unlocked.has(m.id) ? "true" : "false");
-    mobileEls[m.id].setAttribute("aria-label", ariaLabel(m));
-  }
-  document.getElementById("total-count").textContent = unlocked.size;
-  for (const branch in BRANCHES) {
-    const n = SKILL_TREE_DATA.modules.filter(m => m.branch === branch && unlocked.has(m.id)).length;
-    svg.querySelector(`[data-branch-count="${branch}"]`).textContent = n;
-    const mc = document.querySelector(`[data-m-branch-count="${branch}"]`);
-    if (mc) mc.textContent = `${n} / 7`;
-  }
-}
-
 /* ================= tooltip ================= */
 const tooltip = document.getElementById("tooltip");
 const ttName = tooltip.querySelector(".tt-name");
 const ttDesc = tooltip.querySelector(".tt-desc");
 let tooltipFor = null;
 let tooltipAnchor = null;
-let tooltipBlocked = false;
 
-function showTooltip(id, anchor, blocked) {
+function showTooltip(id, anchor) {
   const m = MODULES[id];
   ttName.textContent = m.name;
   ttDesc.textContent = m.description;
   tooltip.classList.toggle("wide", id === JOSH.id); /* Josh's bio needs more room */
-  tooltip.classList.toggle("blocked", !!blocked);
   tooltip.classList.add("show");
   tooltipFor = id;
   tooltipAnchor = anchor;
-  tooltipBlocked = !!blocked;
   const r = anchor.getBoundingClientRect();
   tooltip.style.left = "0px"; tooltip.style.top = "0px"; /* reset before measuring */
   const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
@@ -1045,59 +907,24 @@ function showTooltip(id, anchor, blocked) {
   tooltip.style.top = y + "px";
 }
 function hideTooltip() {
-  tooltip.classList.remove("show", "blocked");
+  tooltip.classList.remove("show");
   tooltipFor = null;
   tooltipAnchor = null;
 }
 
 /* ================= interactions ================= */
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-function flash(id, cls) {
-  if (reducedMotion.matches) return;
-  for (const t of [nodeEls[id], mobileEls[id]]) {
-    t.classList.remove(cls);
-    void t.offsetWidth; /* restart the animation */
-    t.classList.add(cls);
-    t.addEventListener("animationend", () => t.classList.remove(cls), { once: true });
-  }
-}
-
-function toggle(id, anchor) {
-  if (unlocked.has(id)) {
-    /* re-lock this module and everything that depends on it */
-    const drop = [id];
-    while (drop.length) {
-      const cur = drop.pop();
-      if (!unlocked.has(cur)) continue;
-      unlocked.delete(cur);
-      for (const c of CHILDREN[cur] || []) drop.push(c);
-    }
-    saveState(); render();
-    showTooltip(id, anchor, false);
-  } else if (isAvailable(id)) {
-    unlocked.add(id);
-    saveState(); render();
-    flash(id, "pulse");
-    showTooltip(id, anchor, false);
-  } else {
-    flash(id, "shake");
-    showTooltip(id, anchor, true);
-  }
-}
-
 function wireButton(btn) {
   const id = btn.dataset.id;
-  btn.addEventListener("click", () => toggle(id, btn));
+  btn.addEventListener("click", () => showTooltip(id, btn));
   btn.addEventListener("mouseenter", () => {
-    showTooltip(id, btn, !unlocked.has(id) && !isAvailable(id));
+    showTooltip(id, btn);
     if (nodeEls[id]) nodeEls[id].classList.add("hovered");
   });
   btn.addEventListener("mouseleave", () => {
     hideTooltip();
     if (nodeEls[id]) nodeEls[id].classList.remove("hovered");
   });
-  btn.addEventListener("focus", () => showTooltip(id, btn, !unlocked.has(id) && !isAvailable(id)));
+  btn.addEventListener("focus", () => showTooltip(id, btn));
   btn.addEventListener("blur", hideTooltip);
 }
 
@@ -1145,29 +972,27 @@ function initThemeToggle() {
 buildSvg();
 buildMobile();
 buildMarquee();
-loadState();
 initThemeToggle();
-render();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLabels);
 else fitLabels();
 for (const id in buttonEls) wireButton(buttonEls[id]);
 for (const id in mobileEls) wireButton(mobileEls[id]);
 rootLinkEl.addEventListener("mouseenter", () => {
-  showTooltip(JOSH.id, rootLinkEl, false);
+  showTooltip(JOSH.id, rootLinkEl);
   nodeEls[JOSH.id].classList.add("hovered");
 });
 rootLinkEl.addEventListener("mouseleave", () => {
   hideTooltip();
   nodeEls[JOSH.id].classList.remove("hovered");
 });
-rootLinkEl.addEventListener("focus", () => showTooltip(JOSH.id, rootLinkEl, false));
+rootLinkEl.addEventListener("focus", () => showTooltip(JOSH.id, rootLinkEl));
 rootLinkEl.addEventListener("blur", hideTooltip);
 document.addEventListener("pointerdown", e => {
   if (tooltipFor && !e.target.closest("button[data-id]")) hideTooltip();
 });
 window.addEventListener("scroll", () => {
   /* keep the tooltip pinned to its node while the page scrolls */
-  if (tooltipFor && tooltipAnchor) showTooltip(tooltipFor, tooltipAnchor, tooltipBlocked);
+  if (tooltipFor && tooltipAnchor) showTooltip(tooltipFor, tooltipAnchor);
 }, { passive: true });
 </script>
 </body>

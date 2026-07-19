@@ -1,7 +1,7 @@
-// Verification pass for the Camp Codex skill tree (v2 — interactive unlock model).
+// Verification pass for the Camp Codex skill tree (v3 — all modules unlocked by default).
 // Checks: data sync with src/data/skillTree.json, node/edge counts vs the approved
-// Mermaid topology, tooltip content, sequential unlock + cascade re-lock, localStorage
-// persistence, keyboard access, mobile stack layout, console errors, screenshots.
+// Mermaid topology, tooltip content, always-lit state, keyboard access, mobile stack
+// layout, console errors, screenshots.
 // Run: npm install && npm run verify
 import { chromium } from 'playwright';
 import { pathToFileURL, fileURLToPath } from 'url';
@@ -120,57 +120,44 @@ check('Josh tooltip on-screen', joshTipBox && joshTipBox.x >= 0 && joshTipBox.y 
   && joshTipBox.x + joshTipBox.width <= 1440 && joshTipBox.y + joshTipBox.height <= 1000);
 await page.mouse.move(720, 10);
 
-/* ---------- 5. sequential unlock rule ---------- */
-const totalCount = () => page.locator('#total-count').innerText();
-const pressed = id => page.getAttribute(`#hit-layer button[data-id="${id}"]`, 'aria-pressed');
+/* ---------- 5. everything unlocked on load; clicking never changes state ---------- */
+const litState = () => page.evaluate(() => ({
+  litNodes: document.querySelectorAll('#tree-svg g.node.module.unlocked').length,
+  litEdges: document.querySelectorAll('#tree-svg g.edge.lit').length,
+  hasCounter: !!document.getElementById('total-count'),
+  branchCounts: document.querySelectorAll('[data-branch-count]').length,
+  hasHint: !!document.querySelector('#tooltip .tt-hint'),
+  pressed: document.querySelectorAll('#hit-layer button[aria-pressed]').length,
+}));
+let lit = await litState();
+check('all 21 modules lit on load', lit.litNodes === 21, `got ${lit.litNodes}`);
+check('all 21 module edges lit', lit.litEdges === 21, `got ${lit.litEdges}`);
+check('no unlock counters', !lit.hasCounter && lit.branchCounts === 0);
+check('no blocked-hint element', !lit.hasHint);
+check('no aria-pressed toggles', lit.pressed === 0);
 
-// blocked click: deep node with locked parent
+// clicking a node shows its tooltip and changes nothing
 await page.click('#hit-layer button[data-id="context-engineering"]');
 await page.waitForTimeout(150);
-check('blocked node stays locked', (await pressed('context-engineering')) === 'false');
-check('blocked hint shown', await page.locator('#tooltip.blocked .tt-hint').isVisible()
-  && (await page.locator('#tooltip .tt-hint').innerText()) === 'Unlock the previous module first.');
-check('count still 0', (await totalCount()) === '0');
+check('click shows tooltip', await page.locator('#tooltip.show').count() === 1);
+lit = await litState();
+check('click does not change lit state', lit.litNodes === 21 && lit.litEdges === 21);
+check('no unlock key written', (await page.evaluate(() => localStorage.getItem('camp-codex-skill-tree:unlocked:v2'))) === null);
+await page.mouse.move(720, 10);
 
-// base node unlocks without prerequisites
-await page.click('#hit-layer button[data-id="llm-fundamentals"]');
-await page.waitForTimeout(350);
-check('base unlocks', (await pressed('llm-fundamentals')) === 'true');
-check('edge lights up', await page.locator('g.edge[data-edge="root->llm-fundamentals"].lit').count() === 1);
-
-// chain: child now available
-await page.click('#hit-layer button[data-id="coding-agents"]');
-await page.click('#hit-layer button[data-id="context-engineering"]');
-await page.waitForTimeout(200);
-check('chain unlock works', (await pressed('context-engineering')) === 'true');
-check('header count = 3', (await totalCount()) === '3');
-const aiBranchCount = await page.locator('[data-branch-count="ai-skills"]').textContent();
-check('branch counter = 3', aiBranchCount === '3');
-
-// parallel arm independence: skill-building available directly from base
-await page.click('#hit-layer button[data-id="skill-building"]');
-await page.waitForTimeout(150);
-check('parallel arm unlocks independently', (await pressed('skill-building')) === 'true');
-
-// re-lock cascades to dependents but not the sibling arm's root
-await page.click('#hit-layer button[data-id="coding-agents"]');
-await page.waitForTimeout(200);
-check('re-lock cascades', (await pressed('coding-agents')) === 'false' && (await pressed('context-engineering')) === 'false');
-check('sibling arm untouched', (await pressed('skill-building')) === 'true' && (await pressed('llm-fundamentals')) === 'true');
-check('count after cascade = 2', (await totalCount()) === '2');
-
-/* ---------- 6. persistence across reload ---------- */
+/* ---------- 6. reload: still fully lit ---------- */
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(300);
-check('state survives reload', (await pressed('llm-fundamentals')) === 'true'
-  && (await pressed('skill-building')) === 'true' && (await totalCount()) === '2');
+lit = await litState();
+check('still fully lit after reload', lit.litNodes === 21 && lit.litEdges === 21);
 
 /* ---------- 7. keyboard access ---------- */
 await page.focus('#hit-layer button[data-id="curiosity"]');
 check('focus shows tooltip', await page.locator('#tooltip.show').count() === 1);
 await page.keyboard.press('Enter');
 await page.waitForTimeout(300);
-check('keyboard unlock', (await pressed('curiosity')) === 'true');
+check('keyboard activation shows tooltip, no state change', await page.locator('#tooltip.show').count() === 1
+  && (await litState()).litNodes === 21);
 
 /* ---------- 7b. theme toggle: dark default, light opt-in, persisted ---------- */
 const THEME_KEY = 'camp-codex-skill-tree:theme';
@@ -188,7 +175,6 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(300);
 check('light persists across reload', (await themeAttr()) === 'light');
 check('toggle reflects hydrated light theme', (await page.getAttribute('#theme-toggle', 'aria-pressed')) === 'true');
-check('unlock state independent of theme', (await totalCount()) === '3');
 await page.click('#theme-toggle');
 await page.waitForTimeout(100);
 check('toggle back to dark', (await themeAttr()) === null && (await bodyBg()) === 'rgb(11, 14, 20)');
@@ -223,7 +209,7 @@ await page.mouse.move(720, 10);
 await page.waitForTimeout(300);
 await page.screenshot({ path: join(outDir, 'desktop.png'), fullPage: true });
 
-/* ---------- 9. mobile: stacked branches, no sideways scroll, tap-to-unlock ---------- */
+/* ---------- 9. mobile: stacked branches, no sideways scroll, tap shows tooltip ---------- */
 const mCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const m = await mCtx.newPage();
 m.on('console', msg => { if (msg.type() === 'error') errors.push('MOBILE: ' + msg.text()); });
@@ -241,16 +227,16 @@ const mob = await m.evaluate(() => ({
 check('mobile: no horizontal scroll', mob.scrollW <= mob.winW + 1, `${mob.scrollW} > ${mob.winW}`);
 check('mobile: tree hidden, 3 stacked branches + Josh root', mob.treeHidden && mob.sections === 3 && mob.rootSections === 1);
 check('mobile: marquee present', mob.marqueeVisible);
-await m.evaluate(() => localStorage.clear());
-await m.reload({ waitUntil: 'networkidle' });
-await m.waitForTimeout(200);
 await m.tap('.m-node[data-id="app-anatomy"]');
 await m.waitForTimeout(250);
-const mUnlocked = await m.getAttribute('.m-node[data-id="app-anatomy"]', 'aria-pressed');
-const mTip = await m.locator('#tooltip.show').count();
-check('mobile: tap unlocks + shows tooltip', mUnlocked === 'true' && mTip === 1);
-const mCount = await m.locator('[data-m-branch-count="web-app-design"]').innerText();
-check('mobile: branch counter updates', mCount === '1 / 7');
+const mLit = await m.evaluate(() => ({
+  lit: document.querySelectorAll('.mobile-stack .m-node.unlocked').length,
+  litIn: document.querySelectorAll('.mobile-stack li.lit-in').length,
+  counters: document.querySelectorAll('[data-m-branch-count]').length,
+  tip: !!document.querySelector('#tooltip.show'),
+}));
+check('mobile: all 21 rows lit + tap shows tooltip', mLit.lit === 21 && mLit.tip, JSON.stringify(mLit));
+check('mobile: connectors lit, no counters', mLit.litIn === 21 && mLit.counters === 0);
 const mJosh = await m.evaluate(() => {
   const a = document.querySelector('.mobile-root h2 a');
   const desc = document.querySelector('.mobile-root .m-root-desc');
@@ -265,11 +251,9 @@ const rmCtx = await browser.newContext({ viewport: { width: 1440, height: 1000 }
 const rm = await rmCtx.newPage();
 rm.on('pageerror', e => errors.push('REDUCED-MOTION PAGEERROR: ' + e.message));
 await rm.goto(file, { waitUntil: 'networkidle' });
-await rm.evaluate(() => localStorage.clear());
-await rm.reload({ waitUntil: 'networkidle' });
 await rm.click('#hit-layer button[data-id="curiosity"]');
 await rm.waitForTimeout(200);
-check('reduced-motion unlock works', (await rm.getAttribute('#hit-layer button[data-id="curiosity"]', 'aria-pressed')) === 'true');
+check('reduced-motion: click shows tooltip', await rm.locator('#tooltip.show').count() === 1);
 const rmMarquee = await rm.evaluate(() => getComputedStyle(document.getElementById('marquee-track')).animationName);
 check('reduced-motion: marquee static', rmMarquee === 'none');
 await rmCtx.close();
