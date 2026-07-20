@@ -634,14 +634,6 @@ const EDGES = [
   ["b-merge", "b-top1"], ["b-merge", "b-top2"]
 ];
 
-/* Sequential-unlock parents (modules only; base modules have parent null = always available). */
-const PARENT = {};
-const CHILDREN = {};
-for (const [p, c] of EDGES) {
-  if (NODES[c].kind !== "module") continue;
-  PARENT[c] = NODES[p].kind === "module" ? p : null;
-  if (NODES[p].kind === "module") (CHILDREN[p] = CHILDREN[p] || []).push(c);
-}
 
 const MODULES = {};
 for (const m of SKILL_TREE_DATA.modules) MODULES[m.id] = m;

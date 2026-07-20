@@ -2,23 +2,21 @@
 
 An interactive, self-contained web page that renders the **Camp Codex curriculum** as a
 game-style skill tree: three color-coded branches growing from a shared root, 21 modules,
-click-to-unlock progression that persists in your browser.
+all shown permanently lit — hover or tap any module to read its name and description.
 
 **Live site:** https://camp-codex-skill-tree.vercel.app
 (mirror: https://sterling-smith-ku.github.io/camp-codex-skill-tree/)
 
 ## How it works
 
-- **Hover** (or tap) a module for its name and description.
-- **Click** a module to unlock it — modules unlock in order along each arm; a module only
-  opens once the one before it is unlocked. Clicking an unlocked module re-locks it (and
-  everything that depended on it).
-- Progress is saved in `localStorage` and survives a refresh. Counters track each branch
-  (n / 7) and the whole tree (n / 21).
+- **Hover** (or tap) a module to see its name and description in a tooltip.
+- Every module is always lit — the whole curriculum is visible at a glance, with no
+  unlocking required.
+- The entire tree fits the desktop viewport (optimised for 1440 × 1000 and 1366 × 768).
+  On viewports under 768 px the tree becomes three stacked branch lists.
 - The root of the tree is **Josh Wexler** — hover for his bio; clicking opens
   [joshwexler.com/coaching](https://joshwexler.com/coaching/) in a new tab. (On mobile his
-  bio appears inline at the bottom of the stacked list.) He is not part of the unlock
-  progression.
+  bio appears inline at the bottom of the stacked list.)
 
 ## Branches
 
@@ -61,9 +59,10 @@ npm run verify
 ```
 
 Checks data sync with `src/data/skillTree.json`, node/edge counts against the approved
-topology, verbatim tooltip content for all 21 modules, the sequential unlock rule (including
-cascade re-lock), localStorage persistence, keyboard access, reduced motion, the mobile
-stacked layout, and console errors; writes screenshots to `verify-out/` (git-ignored).
+topology, verbatim tooltip content for all 21 modules, always-lit node state,
+fit-to-viewport at 1440 × 1000 and 1366 × 768, theme toggle, marquee, keyboard access,
+reduced motion, the mobile stacked layout, and console errors; writes screenshots to
+`verify-out/` (git-ignored).
 `node scripts/visual-crops.mjs` produces high-res branch crops for visual review.
 
 ## Deploying
