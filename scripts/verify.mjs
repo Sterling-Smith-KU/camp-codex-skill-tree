@@ -209,6 +209,25 @@ await page.mouse.move(720, 10);
 await page.waitForTimeout(300);
 await page.screenshot({ path: join(outDir, 'desktop.png'), fullPage: true });
 
+/* ---------- 8b. whole tree fits the viewport on desktop ---------- */
+const fitAt = async (w, h) => {
+  const c = await browser.newContext({ viewport: { width: w, height: h } });
+  const p = await c.newPage();
+  await p.goto(file, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(300);
+  const r = await p.evaluate(() => ({
+    overflow: document.documentElement.scrollHeight - window.innerHeight,
+    treeH: document.querySelector('.tree-canvas').getBoundingClientRect().height,
+  }));
+  await c.close();
+  return r;
+};
+const fit1440 = await fitAt(1440, 1000);
+check('1440x1000: no vertical scroll', fit1440.overflow <= 1, `overflow ${fit1440.overflow}px`);
+check('1440x1000: tree has real size', fit1440.treeH > 500, `tree ${fit1440.treeH}px`);
+const fit1366 = await fitAt(1366, 768);
+check('1366x768: no vertical scroll', fit1366.overflow <= 1, `overflow ${fit1366.overflow}px`);
+
 /* ---------- 9. mobile: stacked branches, no sideways scroll, tap shows tooltip ---------- */
 const mCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const m = await mCtx.newPage();

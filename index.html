@@ -144,8 +144,12 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 }
 .tree-canvas {
   position: relative;
-  width: 100%;
+  /* fit the whole 1160x1330 tree in the viewport: width derived from available
+     height (100vh minus header + paddings + marquee); the SVG is vector, so
+     browser/pinch zoom magnifies losslessly */
   aspect-ratio: 1160 / 1330;
+  width: min(100%, calc((100vh - 260px) * (1160 / 1330)));
+  margin: 0 auto;
 }
 .tree-canvas svg {
   position: absolute;
