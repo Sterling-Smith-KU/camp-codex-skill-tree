@@ -32,7 +32,7 @@ try { if (localStorage.getItem("camp-codex-skill-tree:theme") === "light") docum
   --ink-muted: rgba(245, 242, 234, 0.55);
   --node-text: rgba(255, 255, 255, 0.5);
   --node-text-bright: rgba(255, 255, 255, 0.92);
-  --root-hover-glow: rgba(255, 255, 255, 0.45);
+  --root-hover-glow: rgba(255, 255, 255, 0.25);
   --m-root-ink: rgba(255, 255, 255, 0.72);
 
   /* Branch colors — match the approved Mermaid topology */
@@ -45,7 +45,7 @@ try { if (localStorage.getItem("camp-codex-skill-tree:theme") === "light") docum
   /* Node states */
   --locked-stroke: #3A4150;
   --locked-fill: #171B23;
-  --unlocked-glow: 0 0 14px;
+  --unlocked-glow: 0 0 6px;
 
   /* Type */
   --font-display: "Chakra Petch", "Rajdhani", sans-serif;
@@ -65,7 +65,7 @@ html[data-theme="light"] {
   --ink-muted: rgba(20, 22, 27, 0.6);
   --node-text: rgba(20, 22, 27, 0.5);
   --node-text-bright: rgba(20, 22, 27, 0.92);
-  --root-hover-glow: rgba(20, 22, 27, 0.3);
+  --root-hover-glow: rgba(20, 22, 27, 0.18);
   --m-root-ink: rgba(20, 22, 27, 0.75);
 
   --ai-skills-text: #A88A00;
@@ -173,7 +173,7 @@ html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
   transition: opacity 0.35s ease;
 }
 .edge.lit .edge-core { stroke: var(--edge-color); stroke-opacity: 0.95; }
-.edge.lit .edge-halo { stroke: var(--edge-color); opacity: 0.28; }
+.edge.lit .edge-halo { stroke: var(--edge-color); opacity: 0.18; }
 
 /* nodes */
 .node { transform-box: fill-box; transform-origin: 50% 50%; }
@@ -556,9 +556,9 @@ window.TOOL_LOGOS = TOOL_LOGOS;
 
 /* ================= branch + topology (authoritative Mermaid graph, section 5 of the spec) ================= */
 const BRANCHES = {
-  "creativity":     { label: "Creativity",       cssColor: "var(--creativity)", textColor: "var(--creativity)",     glow: "rgba(255, 51, 51, 0.6)" },
-  "ai-skills":      { label: "AI Skills",        cssColor: "var(--ai-skills)",  textColor: "var(--ai-skills-text)", glow: "rgba(255, 204, 0, 0.6)" },
-  "web-app-design": { label: "Web & App Design", cssColor: "var(--web-design)", textColor: "var(--web-design)",     glow: "rgba(51, 204, 255, 0.6)" }
+  "creativity":     { label: "Creativity",       cssColor: "var(--creativity)", textColor: "var(--creativity)",     glow: "rgba(255, 51, 51, 0.3)" },
+  "ai-skills":      { label: "AI Skills",        cssColor: "var(--ai-skills)",  textColor: "var(--ai-skills-text)", glow: "rgba(255, 204, 0, 0.3)" },
+  "web-app-design": { label: "Web & App Design", cssColor: "var(--web-design)", textColor: "var(--web-design)",     glow: "rgba(51, 204, 255, 0.3)" }
 };
 
 /* Every node in the approved Mermaid render.
